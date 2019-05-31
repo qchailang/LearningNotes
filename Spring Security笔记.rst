@@ -3,7 +3,7 @@ Spring Security笔记
 *****************
 Spring Security配置
 =================
-.. image:: images/Security 过滤器链.png
+.. image:: images/Security过滤器链.png
 *实际开发中过滤器链中不止这三种过滤器，我们可以通过在过滤器链上增加绿色的过滤器来支持不同的身份认证方式，我们只可以通过配置决定绿色的这类过滤器哪个生效，另两种过滤器是不受控制的，它们一定会出现在指定的位置*
 
 1. 写一个Security的配置类，继承 **WebSecurityConfigurerAdapter类，** 重写 **protected void configure(HttpSecurity http)** 方法.
