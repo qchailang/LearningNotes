@@ -11,12 +11,11 @@ navicat安装步骤
 -------
 
 修改hosts，使用其他镜像站的源
-.. code:: 
-
-	sudo vim /etc/hosts
-	## 在下方添加如下两行：（南非的源，速度很快）
-	155.232.191.245 nchc.dl.sourceforge.net
-	155.232.191.245 ncu.dl.sourceforge.net
+::
+  sudo vim /etc/hosts
+  ## 在下方添加如下两行：（南非的源，速度很快）
+  155.232.191.245 nchc.dl.sourceforge.net
+  155.232.191.245 ncu.dl.sourceforge.net
 
 保存并退出
 
@@ -26,14 +25,12 @@ navicat安装步骤
 打开之前的start_navicat文件
 找到export LANG=en_US.UTF-8修改字符集: export LANG=zh_CN.UTF-8 保存即可  
 如果之前安装一次，因为navicat某些功能无法使用，进入主目录Home，然后点击查看，显示隐藏文件，删除.navicat64文件夹，然后继续安装。
-..code::
-
+::
   sudo ./start_navicat
 
 到期不能用，临时解决方法
 ----------
 删除主目录下./navicat64文件夹
-.. code::
-
+::
   rm -rf ~/.navicat64
 
