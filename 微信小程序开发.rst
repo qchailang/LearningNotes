@@ -1,0 +1,67 @@
+*********
+微信小程序开发笔记
+*********
+模板
+====
+定义模板
+----
+.. code:: 
+
+ <template name="movie-template">
+    <view class="movie-container">
+        <image class="movie-cover" src="{{img}}"></image>
+        <text class="movie-name">{{name}}</text>
+        <view>
+            <text class="movie-rate">{{rate}}</text>
+        </view>
+    </view>
+ </template>
+
+模板的使用
+-----
+wxml文件中引入模板的wxml文件
+^^^^^^^^^
+.. code::
+
+ <import src="/templates/movie-template/movie-template" />
+
+ <view class="container">
+    <view wx:for="{{inTheaters}}" wx:for-item="movie" wx:key="id">
+        <template is="movie-template" data="{{...movie}}" />
+    </view>
+ </view>
+
+需要注意的是 import 有作用域的概念，即只会import 目标文件中定义的 template，而不会 import 目标文件中 import 的 template，简言之就是 import 不具有递归的特性。
+
+import 使用 data 属性传递参数
+
+wxss文件中引入模板的wxss文件
+^^^^^^^^^
+.. code::
+
+ @import "/templates/movie-template/movie-template.wxss";
+
+flex
+====
+ | flex container 弹性容器
+ | flex item 指容器里的子元素。
+ | 所谓弹性布局指的是对容器里的子元素采用flex布局.
+ | 主轴：由flex-direction的属性值决定，row时水平方向为主轴，垂直方向为交叉轴.
+ | 交叉轴：column时垂直方向为主轴，水平方向为交叉轴.
+
+.. code:: css
+
+ display: flex /** 指定弹性布局 inline-flex -取消块状特性的弹性布局 */
+ flex-direction: row /**指定子元素排列方向 row -水平方向排列 column -垂直方向的排列*/
+ justify-content: center /**设置子元素在主轴上的对齐方向*/
+ align-items: center /**设置子元素在交叉轴上的对齐方向*/
+
+#. 块状元素放进flex容器里，块状元素的特性就被消除了，即使显示指明块状特性也无效.
+#. flex-direction的属性值加上“-reverse”可以让子元素反向排列.如"row-reverse"让子元素从右往左的方向依次排列."justify-content"的flex-start指的是从右往左的顺序.
+
+component组件
+===========
+
+
+
+

@@ -1,0 +1,11 @@
+排序一般分为两种：utf_bin和utf_general_ci
+bin 是二进制, a 和 A 会别区别对待.
+例如你运行:
+SELECT * FROM table WHERE txt = 'a'
+那么在utf8_bin中你就找不到 txt = 'A' 的那一行, 而 utf8_general_ci 则可以.
+utf8_general_ci 不区分大小写，这个你在注册用户名和邮箱的时候就要使用。
+utf8_general_cs 区分大小写，如果用户名和邮箱用这个 就会照成不良后果
+utf8_bin:字符串每个字符串用二进制数据编译存储。 区分大小写，而且可以存二进制的内容
+utf8_unicode_ci和utf8_general_ci对中、英文来说没有实质的差别。
+utf8_general_ci校对速度快，但准确度稍差。（准确度够用，一般建库选择这个）
+utf8_unicode_ci准确度高，但校对速度稍慢
