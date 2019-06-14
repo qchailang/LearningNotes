@@ -17,7 +17,7 @@ UML的图例
      .. image:: images/Class.png
    + 接口（Interface）
      
-     接口是一种特殊的类，具有类的结构但不可被实例化，只可以被实现（继承）。在UML中，接口使用一个带有名称的小圆圈来进行表示。
+     在UML中，接口使用一个带有名称的小圆圈来进行表示。
 
      .. image:: images/Interface.png
    + 类图中关系（relation）
