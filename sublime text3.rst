@@ -1,5 +1,41 @@
+注册
+====
+#. 修改/etc/hosts，添加内容：
+::
+	127.0.0.1 www.sublimetext.com
+	127.0.0.1 sublimetext.com
+	127.0.0.1 sublimehq.com
+	127.0.0.1 telemetry.sublimehq.com
+	127.0.0.1 license.sublimehq.com
+	127.0.0.1 45.55.255.55
+	127.0.0.1 45.55.41.223
+#. 关闭 Sublime text3，并打开安装目录，备份一下 sublime_text
+#. 打开网址：https://hexed.it
+
+点击上面的 Open File，弹出的对话框中选择已安装后的 sublime_text.exe。
+Ctrl+F 搜索查找 ，输入97 94 0D，然后点击按钮 Search Now。
+然后在97 94 0D上面点击，替换为00 00 00即可！
+最后点击上面的 Export 按钮导出，将完成后的文件复制到刚才的目录替换掉原来的文件即可！
+#. 运行 sublime_text文件，填入注册码：
+
+----- BEGIN LICENSE -----
+TwitterInc
+200 User License
+EA7E-890007
+1D77F72E 390CDD93 4DCBA022 FAF60790
+61AA12C0 A37081C5 D0316412 4584D136
+94D7F7D4 95BC8C1C 527DA828 560BB037
+D1EDDD8C AE7B379F 50C9D69D B35179EF
+2FE898C4 8E4277A8 555CE714 E1FB0E43
+D5D52613 C3D12E98 BC49967F 7652EED2
+9D2D2E61 67610860 6D338B72 5CF95C69
+E36B85CC 84991F19 7575D828 470A92AB
+------ END LICENSE ------
+
+
+
 **********************************
-linuxmint下sublime text3无法输入中文的解决方法
+linuxmint下sublime text3无法输入中文的解决方法 
 **********************************
 首先保证你的电脑有c++编译环境
 ================

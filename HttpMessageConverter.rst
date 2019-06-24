@@ -1,0 +1,2 @@
+Http请求响应报文其实都是字符串，当请求报文到java程序会被封装为一个ServletInputStream流，开发人员再读取报文，响应报文则通过ServletOutputStream流，来输出响应报文。
+从流中只能读取到原始的字符串报文，同样输出流也是。那么在报文到达SpringMVC / SpringBoot和从SpringMVC / SpringBoot出去，都存在一个字符串到java对象的转化问题。这一过程，在SpringMVC / SpringBoot中，是通过HttpMessageConverter来解决的
