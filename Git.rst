@@ -93,8 +93,3 @@ git push了，因为这个指令会向两个分支同时推送。
 git push origin dev声明远程仓库。
 
 如果你本地开发的分支不是dev，那样就可以先切换到dev，然后把本地的代码和你开发的分支merge一下就可以提交了。
---------------------- 
-作者：Run_youngman 
-来源：CSDN 
-原文：https://blog.csdn.net/Run_youngman/article/details/80743862 
-版权声明：本文为博主原创文章，转载请附上博文链接！
