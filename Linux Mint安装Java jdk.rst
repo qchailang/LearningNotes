@@ -16,10 +16,10 @@ Linux Mint安装Java jdk
 
 ::
 
-	export JAVA_HOME=/opt/Java/jdk1.8.0_192/
-	export JRE_HOME=$JAVA_HOME/jre
-	export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
-	export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib:.
+    export JAVA_HOME=/opt/Java/jdk1.8.0_192/
+    export JRE_HOME=$JAVA_HOME/jre
+    export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
+    export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib:.
 
 4. 退出vim后：运行命令使用环境变量生效
 
