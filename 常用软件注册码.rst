@@ -3,7 +3,6 @@ sublime text3
 ************
 ::
 
-
 	----- BEGIN LICENSE -----
 	sgbteam
 	Single User License
@@ -29,13 +28,14 @@ IntelliJ IDEA 2018
 ***************
 SecureCRT 8.5.2
 ***************
+::
 
-	Name:qchailang[
-	Company:qcdx[
-	Serial Number:03-90-185110[
-	License Key:ABC5QM GCDMT4 G1GQ8S YDXX1C AAF8HP AF5KN2 PMYE8K VUA9JG[
-	Issue Date:12-19-2018[
-	Features:[
+
+  Name:REIZ
+  Company:Toyota
+  Serial Number: 03-52-039026
+  License Key: AAS4RS X1MU15 G9S6WV VTA5TV ACXK55 1JKW75 8R8Z5Z PK4FXJ
+  Issue Date: 08-08-2088
 	
 
 
