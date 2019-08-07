@@ -1,3 +1,25 @@
+
+apt安装
+
+Install the GPG key:
+
+wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | sudo apt-key add -
+
+Ensure apt is set up to work with https sources:
+
+sudo apt-get install apt-transport-https
+
+Select the channel to use:
+
+Stable
+
+    echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sources.list.d/sublime-text.list
+
+Update apt sources and install Sublime Text
+
+sudo apt-get update
+sudo apt-get install sublime-text
+
 注册
 ====
 #. 修改/etc/hosts，添加内容：
@@ -42,9 +64,10 @@ https://raw.githubusercontent.com/SuCicada/channel_v3.json/master/channel_v3.jso
     Ctrl+L 选中整行，继续操作则继续选择下一行，效果和 Shift+↓ 效果一样。
     Ctrl+Shift+L 先选中多行，再按下快捷键，会在每行行尾插入光标，即可同时编辑这些行。
     Ctrl+Shift+M 选择括号内的内容（继续选择父括号）。举个栗子：快速选中删除函数中的代码，重写函数体代码或重写括号内里的内容。
+    Shift + 鼠标右键拖动 按住shift键，然后按下右键，拖动，可能同时出现多个光标，对多行进行列操作；
     Ctrl+M 光标移动至括号内结束或开始的位置。
     Ctrl+Enter 在下一行插入新行。举个栗子：即使光标不在行尾，也能快速向下插入一行。
-    Ctrl+Shift+Enter 在上一行插入新行。举个栗子：即使光标不在行首，也能快速向上插入一行。
+    Ctrl+Shift+Enter 在上一行插入新行。举个栗子：即使光标不在行首，也能快按住shift键，然后按下右键，拖动，可能同时出现多个光标，对多行进行操作；速向上插入一行。
     Ctrl+Shift+[ 选中代码，按下快捷键，折叠代码。
     Ctrl+Shift+] 选中代码，按下快捷键，展开代码。
     Ctrl+K+0 展开所有折叠代码。
@@ -58,8 +81,6 @@ https://raw.githubusercontent.com/SuCicada/channel_v3.json/master/channel_v3.jso
     Ctrl+Shift+→ 向右单位性地选中文本。
     Ctrl+Shift+↑ 将光标所在行和上一行代码互换（将光标所在行插入到上一行之前）。
     Ctrl+Shift+↓ 将光标所在行和下一行代码互换（将光标所在行插入到下一行之后）。
-    Ctrl+Alt+↑ 或Ctrl+Alt+鼠标向上拖动 向上添加多行光标，可同时编辑多行。
-    Ctrl+Alt+↓或Ctrl+Alt+鼠标向下拖动 向下添加多行光标，可同时编辑多行。
 
 多重选择（Multi-Selection）
 
@@ -69,11 +90,11 @@ https://raw.githubusercontent.com/SuCicada/channel_v3.json/master/channel_v3.jso
 
     按住 Ctrl 然后在页面中希望中现光标的位置点击。
     选择数行文本，然后按下 Shift + Ctrl + L。
-    通过反复按下 Ctrl + D 即可将全文中与光标当前所在位置的词相同的词uh逐一加入选择，而直接按下 Alt+F3即可一次性选择所有相同的词。
+    通过反复按下 Ctrl + D 即可将全文中与光标当前所在位置的词相同的词逐一加入选择，而直接按下 Alt+F3即可一次性选择所有相同的词。
     按下鼠标中键来进行垂直方向的纵列选择，也可以进入多重编辑状态。
 
 编辑类
-
+    Ctrl+X：删除当前行
     Ctrl+J 合并选中的多行代码为一行。举个栗子：将多行格式的CSS属性合并为一行。
     Ctrl+Shift+D 复制光标所在整行，插入到下一行。
     Tab 向右缩进。只对光标后（或者选中的）的代码有效
@@ -119,108 +140,3 @@ https://raw.githubusercontent.com/SuCicada/channel_v3.json/master/channel_v3.jso
     Ctrl+K+B 开启/关闭侧边栏。
     F11 全屏模式
     Shift+F11 免打扰模式
-
-
-**********************************
-linuxmint下sublime text3无法输入中文的解决方法 
-**********************************
-首先保证你的电脑有c++编译环境
-================
-::
-
-	sudo apt-get install build-essential
-	sudo apt-get install libgtk2.0-dev
-
-在～（/home）目录新建一个名为sublime-imfix.c的文件
-===================================
-::
-
-	#include <gtk/gtkimcontext.h>
-	 
-	void gtk_im_context_set_client_window (GtkIMContext *context,
-	 
-	         GdkWindow    *window)
-	 
-	{
-	 
-	 GtkIMContextClass *klass;
-	 
-	 g_return_if_fail (GTK_IS_IM_CONTEXT (context));
-	 
-	 klass = GTK_IM_CONTEXT_GET_CLASS (context);
-	 
-	 if (klass->set_client_window)
-	 
-	   klass->set_client_window (context, window);
-	 
-	 g_object_set_data(G_OBJECT(context),"window",window);
-	 
-	 if(!GDK_IS_WINDOW (window))
-	 
-	   return;
-	 
-	 int width = gdk_window_get_width(window);
-	 
-	 int height = gdk_window_get_height(window);
-	 
-	 if(width != 0 && height !=0)
-	 
-	   gtk_im_context_focus_in(context);
-
-	}
-
-将上述文件编译成共享库libsublime-imfix.so
-==============================
-::
-
-	gcc -shared -o libsublime-imfix.so sublime-imfix.c `pkg-config --libs --cflags gtk+-2.0` -fPIC
-
-将libsublime-imfix.so拷贝到sublime_text所在文件夹
-========================================
-::
-
-	sudo mv libsublime-imfix.so /opt/sublime_text/
-
-修改文件/usr/bin/subl的内容
-====================
-::
-
-	sudo vi /usr/bin/subl
-
-改成
-::
-
-	#!/bin/sh
-	LD_PRELOAD=/opt/sublime_text/libsublime-imfix.so exec /opt/sublime_text/sublime_text "$@"
-
-修改文件sublime_text.desktop的内容
-===========================
-[Desktop Entry]中的Exec项
-----------------------
-::
-
-	Exec=/opt/sublime_text/sublime_text %F
-改成
-::
-
-	Exec=bash -c "LD_PRELOAD=/opt/sublime_text/libsublime-imfix.so exec /opt/sublime_text/sublime_text %F"
-
-[Desktop Action Window]中的Exec项
-------------------------------
-::
-
-	Exec=/opt/sublime_text/sublime_text -n
-改成
-::
-
-	Exec=bash -c "LD_PRELOAD=/opt/sublime_text/libsublime-imfix.so exec /opt/sublime_text/sublime_text -n"
-
-[Desktop Action Document]中的Exec项
---------------------------------
-::
-
-	Exec=/opt/sublime_text/sublime_text --command new_file
-改成
-::
-
-	Exec=bash -c "LD_PRELOAD=/opt/sublime_text/libsublime-imfix.so exec /opt/sublime_text/sublime_text --command new_file"
