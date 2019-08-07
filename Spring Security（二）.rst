@@ -68,7 +68,7 @@ Spring Security Web表单方式登录与授权主要流程
 每次访问资源都会被FilterSecurityInterceptor（AbstractSecurityInterceptor接口的实现类）过滤器拦截，通过FilterInvocationSecurityMetadataSource（SecurityMetadataSource接口的实现类）获取被拦截url所需的全部权限，再调用授权管理器AccessDecisionManager，这个授权管理器会通过spring的全局缓存SecurityContextHolder获取用户的权限信息，还会获取被拦截的url和被拦截url所需的全部权限，然后根据所配的策略（有：一票肯定，一票否决，少数服从多数等），如果权限足够，则返回，权限不够则报错并调用权限不足页面。
 
 
-Spring Security 5.xx 源码分析
+Spring Security 5.xx 表单登录流程源码分析
 ==========================
 认证
 ----

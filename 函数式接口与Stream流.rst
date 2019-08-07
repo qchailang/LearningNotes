@@ -7,8 +7,8 @@
 
 Lambda表达式有延迟执行的特点。
 
-Predicate
-Consumer
+#. Predicate
+#. Consumer
 
 
 Stream流
