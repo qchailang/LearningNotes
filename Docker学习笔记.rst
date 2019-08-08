@@ -27,7 +27,7 @@ daocloud.io 国内镜像
 ::
  {
   "registry-mirrors": ["http://hub-mirror.c.163.com"],
-  "insecure-registry": ["myregistry:5000"] // 告诉docker daemon myregistry:5000是不安全的registry
+  "insecure-registries": ["myregistry:5000"] // 告诉docker daemon myregistry:5000是不安全的registry
  }
 
 然后运行命令：
@@ -35,13 +35,6 @@ daocloud.io 国内镜像
  systemctl daemon-reload
  systemctl restart docker
 
-docker-compose安装
-------------
-::
-
-  curl -L "https://github.com/docker/compose/releases/download/1.22.0/docker-compose-$(uname -s)-$(uname -m)" \
-    -o /usr/local/bin/docker-compose
-  chmod +x /usr/local/bin/docker-compose
 
 不同网络，不同主机容器之间通信
 -----------

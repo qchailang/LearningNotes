@@ -6,7 +6,7 @@ navicat安装步骤
 #. cd进入安装目录找到start_navicat文件，sudo ./start_navicat （启动前推荐先改hosts，防止wine下载失败）
 
 此时就已经开始安装，navicat的linux版本自带的wine，会自动下载这两个wine到navicat的安装目录中，wine-gecko、wine-mono下载特别的慢，而且还可能下载失败，从而影响navicat的正常使用．
-
+如果有备份此两文件，将其拷贝到/home/qchailang/.cache/wine下，可避免再次下载。
 解决方法：
 -------
 

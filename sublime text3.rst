@@ -69,7 +69,7 @@ https://raw.githubusercontent.com/SuCicada/channel_v3.json/master/channel_v3.jso
 
     按住 Ctrl 然后在页面中希望中现光标的位置点击。
     选择数行文本，然后按下 Shift + Ctrl + L。
-    通过反复按下 Ctrl + D 即可将全文中与光标当前所在位置的词相同的词逐一加入选择，而直接按下 Alt+F3即可一次性选择所有相同的词。
+    通过反复按下 Ctrl + D 即可将全文中与光标当前所在位置的词相同的词uh逐一加入选择，而直接按下 Alt+F3即可一次性选择所有相同的词。
     按下鼠标中键来进行垂直方向的纵列选择，也可以进入多重编辑状态。
 
 编辑类
