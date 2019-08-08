@@ -104,9 +104,11 @@ Compose file version3例子:
   volumes:
     db-data:
 
-Compose file 是一个定义services, networks 和 volumes的YAML文件.默认路径是 ./docker-compose.yml.也可以是用 .yml 或 .yaml 作为文件扩展名
+Compose file 是一个定义services, networks 和 volumes的YAML文件.Compose file的默认路径是 ./docker-compose.yml.也可以是用 .yml 或 .yaml 作为文件扩展名
 
-service 定义 包含 应用于为该服务启动的每个容器的配置。就像把命令行参数传递给 docker container create。同样，networks和volumes的定义类似于 docker network create 和 docker volume create。
+service定义 包含启动服务的每个容器的配置，就像把命令行参数传递给 docker container create。
+
+同样，networks和volumes的定义类似于 docker network create 和 docker volume create。
 
 与 docker container create 一样，在 Dockerfile 中指定的选项，如 CMD、 EXPOSE、VOLUME、ENV 要慎重对待，默认情况下，你不需要在docker-compose.yml文件中再次指定它们。
 
@@ -116,7 +118,7 @@ service 定义 包含 应用于为该服务启动的每个容器的配置。就�
 
 常用配置项
 ---------
-#. bulid
+#. BUILD
      services 除了可以基于指定的镜像，还可以基于一份 Dockerfile，在使用 up 启动之时执行构建任务，这个构建标签就是 build，它可以指定 Dockerfile 所在文件夹的路径。Compose 将会利用它自动构建这个镜像，然后使用这个镜像启动服务容器。
 
      使用绝对路径
@@ -132,14 +134,46 @@ service 定义 包含 应用于为该服务启动的每个容器的配置。就�
        build:
          context: ../
          dockerfile: path/of/Dockerfile
-#. context 
-     context 选项可以是 Dockerfile 的文件路径，也可以是到链接到 git 仓库的url，当提供的值是相对路径时，它被解析为相对于撰写文件的路径，此目录也是发送到 Docker 守护进程的 context
-#. dockerfile
+#. CONTEXT
+     context 选项可以是包含 Dockerfile 的文件的目录路径，也可以是到链接到 git 仓库的url，当提供的值是相对路径时，它被解析为相对于撰写文件的路径，此目录也是发送到 Docker 守护进程的 context
+#. DOCKERFILE
      使用此 dockerfile 文件来构建镜像，必须指定构建路径。
-#. image
+#. IMAGE
      指定服务的镜像名称或镜像 ID。如果镜像在本地不存在，Compose 将会尝试拉取这个镜像。
-#. args
-#. commaond
+#. ARGS
+     增加build参数，这是一个仅仅只能在build过程中访问的环境变量。
+
+     首先在Dockerfile文件中指定参数
+     ::
+       ARG buildno
+       ARG gitcommithash
+
+       RUN echo "Build number: $buildno"
+       RUN echo "Based on commit: $gitcommithash"
+     然后在build关键字下面指定参数，你可传递一个映射或一个一列表。
+     ::
+       build:
+         context: .
+         args:
+           buildno: 1
+           gitcommithash: cdc3b19
+
+     ::
+
+        build:
+         context: .
+         args:
+           - buildno=1
+           - gitcommithash=cdc3b19
+
+     在Dockerfile中，如果在FROM指令之前指定arg，则arg在FROM后面的构建指令中不可用。如果需要在这两个地方都有一个参数可用，也可以在FROM指令后面指定它。
+
+     如果在build参数中省略了值，这这种情况下，它在构建时的值就是运行compose的环境中的值。
+     ::
+       args:
+         - buildno
+         - gitcommithash
+#. COMMAND
 #. container_name
      Compose 的容器名称格式是：<项目名称><服务名称><序号>
 

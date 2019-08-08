@@ -1,7 +1,12 @@
+
 Docker安装
 =========
+<<<<<<< HEAD:Docker学习笔记.rst
 官网文档地址: https://docs.docker.com
 
+=======
+文档官网: https://docs.docker.com/
+>>>>>>> e7d963fc414b38132be9a3e7322c226953a77d7b:Docker/Docker学习笔记.rst
 daocloud.io 国内镜像
 ::
  curl -sSL https://get.daocloud.io/docker | sh
@@ -20,6 +25,7 @@ daocloud.io 国内镜像
 #. 安装docker ce(docker社区版)
    ::
     yum -y install docker-ce
+
 
 镜像加速
 -------
