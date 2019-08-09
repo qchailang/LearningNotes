@@ -17,6 +17,11 @@
 
 $ git config --global core.quotepath false
 
+git log 不能显示中文::
+
+$ git --no-pager log
+$ git config --global core.pager more
+
 添加多个远程仓库
 
 第一种方式：
