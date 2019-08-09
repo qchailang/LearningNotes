@@ -39,7 +39,7 @@ git pull xxxx    远程分支名：本地分支名
 git push xxxx   本地分支名：远程分支名
 
 
-第二种方式：（好处时，推送时，可以同时推送到另外一个库）
+第二种方式：（好处是推送时，可以同时推送到另外一个库）
 
 git remote set-url --add origin https://qchailang:abc@gitee.com/qchailang/LearningNotes.git
 
