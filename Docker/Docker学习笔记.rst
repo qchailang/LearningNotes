@@ -1,22 +1,16 @@
-
 Docker安装
 =========
-<<<<<<< HEAD:Docker学习笔记.rst
 官网文档地址: https://docs.docker.com
-
-=======
-文档官网: https://docs.docker.com/
->>>>>>> e7d963fc414b38132be9a3e7322c226953a77d7b:Docker/Docker学习笔记.rst
-daocloud.io 国内镜像
-::
- curl -sSL https://get.daocloud.io/docker | sh
 
 通过yum安装：
 ---------
 #. 安装所需的软件包．
    ::
     yum install -y yum-utils device-mapper-persistent-data lvm2
-
+#. 下载阿里云yum源(可选)
+   ::
+    wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+    
 #. 设置稳定的存储库．
    ::
     yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo

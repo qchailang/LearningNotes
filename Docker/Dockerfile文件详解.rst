@@ -1,7 +1,11 @@
 ==================
 Dockerfile文件详解
 ==================
+
+官网文档地址: https://docs.docker.com/v17.09/engine/reference/builder/#environment-replacement
 Docker可以通过读取Dockerfile中的指令自动构建镜像。 Dockerfile是一个文本文档，其中包含用户可以在命令行上调用以装配镜像的所有命令。 使用docker build用户可以创建一个连续执行多个命令行指令的自动构建。
+
+一般的，Dockerfile 分为四部分：基础镜像信息、维护者信息、镜像操作指令和容器启动时执行指令。
 
 docker build命令从Dockerfile和上下文构建一个映像。 **构建的上下文** 是指“指定位置PATH或URL中的文件集”。 PATH是本地文件系统上的一个目录。 该URL是一个Git存储库位置。
 
@@ -15,7 +19,6 @@ docker build命令从Dockerfile和上下文构建一个映像。 **构建的上�
  
  !（感叹号）开头的行可用于排除例外情况
 
-
 Dockerfile位于上下文的根目录中。 你可以将-f标志与docker build一起使用，以指向文件系统中任何位置的Dockerfile。
 
 该指令不区分大小写。 但是，惯例是让它们成为大写的，以便更容易地将它们与参数区分开来。
@@ -24,6 +27,8 @@ Docker按顺序在Dockerfile中运行指令。 Dockerfile必须以FROM指令开�
 
 常用指令
 -------
+指令的一般格式为 INSTRUCTION arguments
+
 LABEL
 +++++
   LABEL指令将元数据添加到image中。LABEL是一个键值对。要在LABEL值中包含空格，请使用引号和反斜杠。
@@ -37,6 +42,10 @@ LABEL
   LABEL multi.label1="value1" \
       multi.label2="value2" \
       other="value3"
+
+ARG
+====
+
 FROM
 ++++
  指定基础镜像，必须为第一个命令。
@@ -47,6 +56,12 @@ FROM
 FROM指令初始化新的构建阶段并为后续指令设置基础镜像。因此，有效的Dockerfile必须以FROM指令开头。镜像可以是任何有效镜像 - 通过从公共存储库中提取镜像（pulling an image）来启动它尤其容易。
 
 ARG是Dockerfile中唯一可以在FROM之前的指令。
+在FROM之前声明的ARG在构建阶段之外，因此在FROM之后的任何指令中都不能使用它。 要使用在第一个FROM之前声明的ARG变量的缺省值，请在构建阶段内使用没有值的ARG指令
+::
+  ARG VERSION=latest
+  FROM busybox:$VERSION
+  ARG VERSION
+  RUN echo $VERSION > image_version
 
 FROM可以在单个Dockerfile中多次出现以创建多个镜像，或者使用一个构建阶段作为另一个构建阶段的依赖项。只需在每个新的FROM指令之前记下提交输出的最后一个图像ID。每个FROM指令清除先前指令创建的任何状态。
 
@@ -69,7 +84,7 @@ COPY指令从<src>复制新文件或目录，并将它们添加到容器的文�
   COPY hom* /mydir/        # adds all files starting with "hom"
   COPY hom?.txt /mydir/    # ? is replaced with any single character, e.g., "home.txt"
 
-<dest>是绝对路径，或相对于WORKDIR的路径，源将在目标容器中复制到该路径中。
+<dest>是绝对路径，或相对于WORKDIR的路径，<src>将在目标容器中复制到该路径中。
 ::
   COPY test relativeDir/   # adds "test" to `WORKDIR`/relativeDir/
   COPY test /absoluteDir/  # adds "test" to /absoluteDir/
@@ -99,23 +114,52 @@ COPY遵守以下规则：
 
 * 如果<dest>不存在，则会在其路径中创建所有缺少的目录。
 
+ADD
+===
+
+VOLUME
+=======
+
 RUN
 ++++
-  构建镜像时执行的命令，复杂的RUN请用反斜线换行，避免无用分层，合并多条命令成一行！
+  构建镜像时执行的命令，复杂的RUN请用反斜线\换行，避免无用分层，合并多条命令成一行！
 * RUN <command> (shell形式，命令在shell中运行，Linux默认为/bin/sh -c, Windows为cmd /S /C)
-* RUN ["executable", "param1", "param2"] (exec form)
+* RUN ["executable", "param1", "param2"] (exec形式)
+ **exec形式** 不会调用command shell。这意味着不会发生正常的shell处理。例如，RUN [ "echo", "$HOME" ]不会对$HOME执行变量替换。如果你想要shell处理，那么要么使用shell形式，要么直接执行shell.
 
 CMD
 +++
   设置容器启动后默认执行的命令和参数
-* Shell
-* Exec 格式
-容器启动时默认执行的命令
+* CMD ["executable","param1","param2"] 使用 exec 执行，推荐方式；
+* CMD command param1 param2 在 /bin/sh 中执行，提供给需要交互的应用；
+* CMD ["param1","param2"] 提供给 ENTRYPOINT 的默认参数；
 
-如果docker run 指定了其他命令，CMD命令被忽略
+如果docker run指定了其他命令，CMD命令被忽略。
 
-如就是定义了多个CMD，只有最后一个会执行
+如果定义了多个CMD，只有最后一个会执行。
+
+命令执行的形式
+ * Shell 形式
+   启用新的sub-shell（新的子进程）,然后在其下执行命令，可以使用环境变量(这是Shell的特性)。
+ * Exec 形式 
+   使用exec命令并不启动新的shell，而是使用执行命令替换当前的shell进程(此命令进程的pid为1)，并且将老进程的环境清理掉，而且exec命令后的其他命令将不再执行。不可以使用环境变量。
 
 ENTRTYPOINT
 +++++++++++
-  设置容器启动时运行的命令，让容器以应用程序或者服务的形式运行，不会被忽略，一定会执行
+  设置容器启动时运行的命令，让容器以应用程序或者服务的形式运行，不可被docker run 提供的参数覆盖，一定会执行。
+
+  每个 Dockerfile 中只能有一个 ENTRYPOINT，当指定多个时，只有最后一个起效。
+
+EXPOSE
+=======
+
+VOLUME
+=======
+  创建一个可以从本地主机或其他容器挂载的挂载点，一般用来存放数据库和需要保持的数据等。
+* VOLUME ["/data"]。
+
+USER
+=====
+  指定运行容器时的用户名或 UID，后续的 RUN 也会使用指定用户。
+* USER daemon。
+当服务不需要管理员权限时，可以通过该命令指定运行用户。并且可以在之前创建所需要的用户，例如：RUN groupadd -r postgres && useradd -r -g postgres postgres。要临时获取管理员权限可以使用 gosu，而不推荐 sudo。
