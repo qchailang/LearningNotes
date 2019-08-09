@@ -40,8 +40,34 @@ LABEL
       multi.label2="value2" \
       other="value3"
 
+WORKDIR
+++++++++
+ 设置工作目录
+* WORKDIR /path/to/workdir
+WORKDIR指令为Dockerfile中的任何RUN、CMD、ENTRYPOINT、COPY和ADD指令设置工作目录。 如果WORKDIR不存在，即使它未在任何后续Dockerfile指令中使用，也将创建它。
+
+WORKDIR指令可以在Dockerfile中多次使用。 如果提供了相对路径，则它将相对于先前WORKDIR指令的路径。
+::
+  WORKDIR /a
+  WORKDIR b
+  WORKDIR c
+  RUN pwd
+输出结果是： /a/b/c
+
+WORKDIR指令可以解析先前使用ENV设置的环境变量。 你只能使用Dockerfile中显式设置的环境变量。
+::
+  ENV DIRPATH /path
+  WORKDIR $DIRPATH/$DIRNAME
+  RUN pwd
+输出结果是： /path/$DIRNAME
+
 ARG
 ++++
+ 构建参数
+* ARG <name>[=<default value>]
+arg指令定义了一个变量，用户可以使用docker build命令在构建时使用--build arg <varname>=<value>标志将该变量传递给构建器。
+
+你可以使用ARG或ENV指令指定RUN指令可用的变量。 使用ENV指令定义的环境变量始终覆盖同名的ARG指令。
 
 FROM
 ++++
@@ -121,9 +147,6 @@ ADD
  * <src>可以是URLs
  * 如果<src>是可识别的压缩格式（identity、gzip、bzip2或xz）的本地tar存档，则将其解压缩为目录。远程URL中的资源不解压缩。
 
-VOLUME
-+++++++
-
 RUN
 ++++
   构建镜像时执行的命令，复杂的RUN请用反斜线\换行，避免无用分层，合并多条命令成一行！
@@ -134,9 +157,11 @@ RUN
 CMD
 +++
   设置容器启动后默认执行的命令和参数
-* CMD ["executable","param1","param2"] 使用 exec 执行，推荐方式；
-* CMD command param1 param2 在 /bin/sh 中执行，提供给需要交互的应用；
-* CMD ["param1","param2"] 提供给 ENTRYPOINT 的默认参数；
+* CMD ["executable","param1","param2"] exec形式，这是首选形式；
+* CMD command param1 param2 Shell形式，提供给需要交互的应用；
+* CMD ["param1","param2"] 作为ENTRYPOINT的默认参数；
+   
+   如果使用CMD为ENTRYPOINT指令提供默认参数，则应使用JSON数组格式指定CMD和ENTRYPOINT指令。
 
 如果docker run指定了其他命令，CMD命令被忽略。
 
@@ -150,14 +175,14 @@ CMD
 
 ENTRTYPOINT
 +++++++++++
-  设置容器启动时运行的命令，允许你配置将作为可执行文件运行的容器。不可被docker run 提供的参数覆盖，一定会执行。
+  设置容器启动后运行的命令，允许你配置将作为可执行文件运行的容器。不可被docker run 提供的参数覆盖，一定会执行。
 
 * ENTRYPOINT ["executable", "param1", "param2"] (exec形式, 首选)
 * ENTRYPOINT command param1 param2 (shell形式)
 
-docker run <image>的命令行参数将附加在exec形式的ENTRYPOINT的所有元素后面，并覆盖使用CMD指定的所有元素。这允许将参数传递给ENTRYPOINT，即docker run <image> -d将-d参数传递给ENTRYPOINT。你可以使用docker run --entrypoint标志覆盖ENTRYPOINT指令。
+exec形式：docker run <image>的命令行参数将附加在ENTRYPOINT的所有元素后面，并覆盖使用CMD指定的所有元素。这允许将参数传递给ENTRYPOINT，即docker run <image> -d将-d参数传递给ENTRYPOINT。你可以使用docker run --entrypoint标志覆盖ENTRYPOINT指令。
 
-shell形式防止使用任何CMD命令参数或run命令行参数，缺点是ENTRYPOINT将作为/bin/sh-c的子命令启动，而该子命令不传递信号。这意味着可执行文件将不能成为容器的pid 1，也不会接收unix信号，因此可执行文件将不会从docker stop<container>接收SIGTERM信号。
+shell形式：防止使用任何CMD命令参数或run命令行参数，缺点是ENTRYPOINT将作为/bin/sh-c的子命令启动，而该子命令不传递信号。这意味着可执行文件将不能成为容器的pid 1，也不会接收unix信号，因此可执行文件将不会从docker stop<container>接收SIGTERM信号。
 
 每个Dockerfile中只能有一个ENTRYPOINT，当指定多个时，只有最后一个有效。
 
@@ -205,21 +230,49 @@ Dockerfile内容：
 了解CMD和ENTRYPOINT如何相互作用：
 -------------------------------
 CMD和ENTRYPOINT指令都定义了运行容器时执行的命令。 这里有点规则描述他们之间的合作。
-
-* Dockerfile应至少指定一个CMD或ENTRYPOINT命令。
-* 使用容器作为可执行文件时，应定义ENTRYPOINT。
-* CMD应该用作为ENTRYPOINT命令定义默认参数或在容器中执行特定命令的方法。
-* 当使用可选参数运行容器时，将覆盖CMD。
+ * Dockerfile应至少指定一个CMD或ENTRYPOINT命令。
+ * 使用容器作为可执行文件时，应定义ENTRYPOINT。
+ * CMD应该用作为ENTRYPOINT命令定义默认参数或在容器中执行特定命令的方法。
+ * 当使用可选参数运行容器时，将覆盖CMD。
 
 EXPOSE
 +++++++
+::
+
+  EXPOSE <port> [<port>/<protocol>...]
+
+EXPOSE指令通知Docker容器在运行时侦听指定的网络端口。 你可以指定端口是侦听TCP还是UDP，如果未指定协议，则默认为TCP。
+
+EXPOSE指令实际上不发布端口。只是用于计划要发布的端口。要在运行容器时实际发布端口，在docker run上使用-p标志发布和映射一个或多个端口，或使用-P标志发布所有公开的端口并将它们映射到高阶(high-order)端口。
+
+无论EXPOSE设置如何，你都可以使用-p标志在运行时覆盖它们。
+
+docker network命令支持创建用于容器之间通信的网络，而无需公开或发布特定端口，因为连接到网络的容器可以通过任何端口相互通信。
+
 VOLUME
 ++++++
   创建一个可以从本地主机或其他容器挂载的挂载点，一般用来存放数据库和需要保持的数据等。
 * VOLUME ["/data"]。
+VOLUME指令创建具有指定名称的安装点，并将其标记为从本机主机或其他容器保持的外部挂载的卷。 该值可以是JSON数组，VOLUME ["/var/log/"]或具有多个参数的纯字符串，例如VOLUME /var/log 或 VOLUME /var/log /var/db
+
+有关指定卷的说明
+------------------
+* 从Dockerfile中更改卷：如果任何构建步骤在声明后更改卷内的数据，那么这些更改将被丢弃。
+* JSON格式：列表被解析为JSON数组。你必须用双引号（"）而不是单引号（’）括起来。
+* 主机目录在容器运行时声明：主机目录（挂载点）本质上是依赖于主机的。这是为了保持镜像的可移植性，因为不能保证给定的主机目录在所有主机上都可用。因此，你无法从Dockerfile中挂载主机目录。 VOLUME指令不支持指定host-dir参数。你必须在创建或运行容器时指定挂载点。
 
 USER
 +++++
   指定运行容器时的用户名或 UID，后续的 RUN 也会使用指定用户。
 * USER daemon。
 当服务不需要管理员权限时，可以通过该命令指定运行用户。并且可以在之前创建所需要的用户，例如：RUN groupadd -r postgres && useradd -r -g postgres postgres。要临时获取管理员权限可以使用 gosu，而不推荐 sudo。
+
+ENV 
+++++
+ 设置环境变量
+* ENV <key> <value> 将单个变量设置为一个值。 第一个空格后面的整个字符串将被视为<value> - 包括空格字符。 
+* ENV <key>=<value> ... 允许一次设置多个变量。
+此值将存在于构建阶段中所有后续指令的环境中，并且也可以在许多时候内部替换。
+
+当从生成的镜像运行容器时，使用ENV设置的环境变量将保持不变。 你可以使用docker inspect查看值，并使用docker run --env <key>=<value>更改它们。
+
