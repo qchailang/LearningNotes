@@ -1,13 +1,13 @@
 ==================
 Dockerfile文件详解
 ==================
-
 官网文档地址: https://docs.docker.com/v17.09/engine/reference/builder/#environment-replacement
+
 Docker可以通过读取Dockerfile中的指令自动构建镜像。 Dockerfile是一个文本文档，其中包含用户可以在命令行上调用以装配镜像的所有命令。 使用docker build用户可以创建一个连续执行多个命令行指令的自动构建。
 
 一般的，Dockerfile 分为四部分：基础镜像信息、维护者信息、镜像操作指令和容器启动时执行指令。
 
-docker build命令从Dockerfile和上下文构建一个映像。 **构建的上下文** 是指“指定位置PATH或URL中的文件集”。 PATH是本地文件系统上的一个目录。 该URL是一个Git存储库位置。
+docker build命令从Dockerfile和上下文构建一个映像。 构建的 **上下文** 是指“指定位置PATH或URL中的文件集”。 PATH是本地文件系统上的一个目录。 URL是一个Git存储库位置。
 
 上下文是递归处理的。因此， PATH包含任何子目录，且URL包含存储库及其子模块。
 
@@ -31,10 +31,9 @@ Docker按顺序在Dockerfile中运行指令。 Dockerfile必须以FROM指令开�
 
 LABEL
 +++++
-  LABEL指令将元数据添加到image中。LABEL是一个键值对。要在LABEL值中包含空格，请使用引号和反斜杠。
+  LABEL指令将元数据添加到镜像中。LABEL是一个键值对。要在LABEL值中包含空格，请使用引号和反斜杠。
 
-  image中可以有多个标签。要指定多个标签，Docker建议LABEL在可能的情况下将标签组合到单个指令中。每个LABEL指令产生一个新的层。
-
+  镜像中可以有多个标签。要指定多个标签，Docker建议LABEL在可能的情况下将标签组合到单个指令中。每个LABEL指令产生一个新的层。
 ::
 
   LABEL multi.label1="value1" multi.label2="value2" other="value3"
@@ -116,6 +115,13 @@ COPY遵守以下规则：
 
 ADD
 ===
+ 同COPY
+* ADD [--chown=<user>:<group>] <src>... <dest>
+* ADD [--chown=<user>:<group>] ["<src>",... "<dest>"]
+
+与COPY的不同点
+ * <src>可以是URLs
+ * 如果<src>是可识别的压缩格式（identity、gzip、bzip2或xz）的本地tar存档，则将其解压缩为目录。远程URL中的资源不解压缩。
 
 VOLUME
 =======
@@ -147,6 +153,10 @@ CMD
 ENTRTYPOINT
 +++++++++++
   设置容器启动时运行的命令，让容器以应用程序或者服务的形式运行，不可被docker run 提供的参数覆盖，一定会执行。
+
+* ENTRYPOINT ["executable", "param1", "param2"] (exec形式, 首选)
+* ENTRYPOINT command param1 param2 (shell形式)
+
 
   每个 Dockerfile 中只能有一个 ENTRYPOINT，当指定多个时，只有最后一个起效。
 
