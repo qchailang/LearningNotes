@@ -150,7 +150,7 @@ service定义 包含启动服务的每个容器的配置，就像把命令行参
 
        RUN echo "Build number: $buildno"
        RUN echo "Based on commit: $gitcommithash"
-     然后在build关键字下面指定参数，你可传递一个映射或一个一列表。
+     然后在build关键字下面指定参数，你可传递一个映射或一个列表。
      ::
        build:
          context: .
@@ -174,6 +174,34 @@ service定义 包含启动服务的每个容器的配置，就像把命令行参
          - buildno
          - gitcommithash
 #. COMMAND
+     覆盖默认命令，参考Dockerfile。
+
+#. entrypoint
+    覆盖默认入口点，参考Dockerfile。
+
+#. configs
+     使用每个服务配置授予对每个服务配置的访问权限，支持两种不同的语法变体。
+
+      注意：配置必须已经存在或在configs此堆栈文件的顶层配置中定义，否则堆栈部署将失败
+     简短的语法变体只能指定配置​​名称。这允许容器访问配置并将其安装在/<config_name>容器内。源名称和目标装入点都设置为配置名称。
+
+     以下示例使用简短语法将redis服务访问权限授予my_config和my_other_configconfigs。值my_config被设置为文件的内容./my_config.txt，而my_other_config定义为外部资源，这意味着它已经在 Docker 中定义，可以通过运行该docker config create命令或通过另一个堆栈部署。如果外部配置不存在，则堆叠部署失败并出现config not found错误。
+     ::
+       version: "3.3"
+       services:
+         redis:
+           image: redis:latest
+           deploy:
+             replicas: 1
+           configs:
+             - my_config
+             - my_other_config
+       configs:
+         my_config:
+           file: ./my_config.txt
+         my_other_config:
+           external: true
+
 #. container_name
      Compose 的容器名称格式是：<项目名称><服务名称><序号>
 
@@ -184,17 +212,92 @@ service定义 包含启动服务的每个容器的配置，就像把命令行参
      这样容器的名字就指定为 app 了。
 #. depends_on
      这个标签解决了容器的依赖、启动先后的问题。
+
+     docker-compose up 将按依赖顺序启动服务。在以下示例中，db 和 redis 将在 web 之前启动。
+
+     docker-compose up SERVICE 将自动包含 SERVICE 的依赖项。在以下示例中，docker-compose up web 还将创建并启动 db 和 redis 。
+
+     ::
+       version: '3'
+       services:
+         web:
+           build: .
+           depends_on:
+             - db
+             - redis
+         redis:
+           image: redis
+         db:
+           image: postgres
+
+     depends_on 不会等到 db 和 redis 在启动 web 之前“准备好” - 只是在们之前启动。
+
+#. tmpfs
+    在容器内安装临时文件系统。可以是单个值或列表。
+
 #. pid
+     将PID模式设置为主机PID模式，跟主机系统共享进程命名空间。容器使用这个标签将能够访问和操纵其他容器和宿主机的名称空间。
 #. ports
      映射端口的标签。
 
      使用HOST:CONTAINER格式或者只是指定容器的端口，宿主机会随机映射端口。
+     ::
+       ports:
+         - "3000"
+         - "8000:8000"
+         - "49100:22"
+         - "127.0.0.1:8001:8001"
+
+#. links
+     链接到另一个服务中的容器。指定服务名称和链接别名（SERVICE:ALIAS），或仅指定服务名称。
+     ::
+       web:
+         links:
+          - db
+          - db:database
+          - redis
+
+      如果同时定义链接和网络，则它们之间具有链接的服务必须共享至少一个共同的网络才能进行通信。
+
+#. external_links
+     链接到此组件之外docker-compose.yml或甚至在 Compose 之外的容器，尤其是对于提供共享或公共服务的容器，linksCONTAINER:ALIAS。
+     ::
+       external_links:
+          - redis_1
+          - project_db_1:mysql
+          - project_db_1:postgresql
+
+     链接服务的容器可以在与别名相同的主机名上访问，如果未指定别名，则可以访问服务名称。
+
+     启用服务进行通信不需要链接 - 默认情况下，任何服务都可以通过该服务的名称访问任何其他服务。
+
+     链接还以与depends_on相同的方式表示服务之间的依赖关系，因此它们确定服务启动的顺序。
+       注意： 如果您使用的是版本2或更高版本的文件格式，则外部创建的容器必须至少连接到与链接到它们的服务相同的网络之一。
+
 #. extra_hosts
      添加主机名的标签，就是往/etc/hosts文件中添加一些记录，与Docker client的--add-host类似：
      ::
        extra_hosts:
          - "somehost:162.242.195.82"
          - "otherhost:50.31.209.229"
+
+#. logging
+     日志服务的配置
+   ::
+     logging:
+       driver: syslog
+       options:
+         syslog-address: "tcp://192.168.0.42:123"
+
+    该driver名称指定服务容器的日志记录驱动程序，与docker run  --log-driver选项一起使用。。
+
+    默认值为json-file。
+
+    ::
+      driver: "json-file"
+      driver: "syslog"
+      driver: "none"
+      
 #. volumes
      挂载一个目录或者一个已存在的数据卷容器，可以直接使用 [HOST:CONTAINER] 这样的格式，或者使用 [HOST:CONTAINER:ro] 这样的格式，后者对于容器来说，数据卷是只读的，这样可以有效保护宿主机的文件系统。
      Compose的数据卷指定路径可以是相对路径，使用 . 或者 .. 来指定相对目录。
@@ -216,7 +319,20 @@ service定义 包含启动服务的每个容器的配置，就像把命令行参
        // 已经存在的命名的数据卷。
        - datavolume:/var/lib/mysq
 #. environment
-     定义环境变量
+     添加环境变量。您可以使用数组或字典。任何布尔值; true，false，yes no，需要用引号括起来，以确保YML解析器不会将它们转换为 True 或 False 。
+
+     仅具有键的环境变量将解析为计算机正在运行的计算机上的值。	
+
      ::
+       environment:
+         RACK_ENV: development
+         SHOW: 'true'
+         SESSION_SECRET:
+       
+       environment:
+         - RACK_ENV=development
+         - SHOW=true
+         - SESSION_SECRET
+
        environment
-           - MYSQL_ROOT_PASSWORD=123456 # 注意：定义环境变量时必须=前后不留空格
+           - MYSQL_ROOT_PASSWORD=123456 # 注意：定义环境变量时=前后不留空格
