@@ -1,9 +1,21 @@
 =======================
 Redis 5 Docker集群配置
 =======================
-
-======================
-
+Dockerfile 示例:
+::
+  #基础镜像
+  FROM redis
+  ##将自定义conf文件拷入
+  COPY redis.conf /usr/local/redis/redis.conf
+  ##修复时区
+  RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+       echo 'Asia/Shanghai' >/etc/timezone
+  ## Redis客户端连接端口
+  EXPOSE 6379
+  ## 集群总线端口:redis客户端连接的端口 + 10000
+  EXPOSE 16379
+  ENTRYPOINT ["docker-entrypoint.sh"]
+  CMD ["redis-server","/usr/local/redis/redis.conf"]
 
 redis.conf 示例:
 ::
@@ -24,6 +36,51 @@ redis.conf 示例:
   cluster-announce-port ${PORT}
   cluster-announce-bus-port 1${PORT}
 
+docker-compose.yml 示例:
+::
+  version: "3.7"
+  services:
+    redis-1:
+      image: redis:v3
+      container_name: redis-1
+      networks:
+        net:
+          ipv4_address: 172.18.0.2
+    redis-2:
+      image: redis:v3
+      container_name: redis-2
+      networks:
+        net:
+          ipv4_address: 172.18.0.3
+    redis-3:
+      image: redis:v3
+      container_name: redis-3
+      networks:
+        net:
+          ipv4_address: 172.18.0.4
+    redis-4:
+      image: redis:v3
+      container_name: redis-4
+      networks:
+        net:
+          ipv4_address: 172.18.0.5
+    redis-5:
+      image: redis:v3
+      container_name: redis-5
+      networks:
+        net:
+          ipv4_address: 172.18.0.6
+    redis-6:
+      image: redis:v3
+      container_name: redis-6
+      networks:
+        net:
+          ipv4_address: 172.18.0.7
+  networks:
+    net:
+      ipam:
+        config:
+          - subnet: 172.18.0.0/24 
 在Redis Cluster集群模式下，集群的节点需要告诉用户或者是其他节点连接自己的IP和端口。
 默认情况下，Redis会自动检测自己的IP和从配置中获取绑定的PORT，告诉客户端或者是其他节点。而Docker使用了一种称为端口映射的技术：在Docker容器中运行的程序可能会暴露出与程序所使用的端口不同的端口。这对于在同一服务器上同时使用同一端口运行多个容器很有用，因此在Docker环境中，如果使用的不是host网络模式，在容器内部的IP和PORT对外都是隔离的，那么宿主机外部的客户端或其他节点就无法通过此节点公布的IP和PORT建立连接。
 
@@ -42,3 +99,15 @@ redis.conf 示例:
 redis 4.0中加入了配置项后：
 
 .. image:: ../images/redis_2.webp
+
+创建集群命令（宿主机方式）
+::
+  echo yes | docker run -i --rm --net redis_net redis:v3 redis-cli --cluster create \
+    172.18.0.2:6379 172.18.0.3:6379 172.18.0.4:6379 172.18.0.5:6379 172.18.0.6:6379 172.18.0.7:6379 \
+    --cluster-replicas 1
+创建集群命令（容器内运行方式）
+::
+  docker run --rm --network redis_net -ti redis:v3 bash
+  echo yes | redis-cli --cluster create \
+      172.18.0.2:6379 172.18.0.3:6379 172.18.0.4:6379 172.18.0.5:6379 172.18.0.6:6379 172.18.0.7:6379 \
+      --cluster-replicas 1
