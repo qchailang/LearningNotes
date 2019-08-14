@@ -117,6 +117,23 @@ redis 4.0中加入了配置项后：
 
 .. image:: ../images/redis_2.webp
 
+Dockerfile 示例
+::
+  #基础镜像
+  FROM redis
+  ##将自定义conf文件拷入
+  COPY redis.conf /usr/local/redis/redis.conf
+  COPY docker-entrypoint.sh /usr/local/bin/
+  ##修复时区
+  RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+   echo 'Asia/Shanghai' >/etc/timezone 
+  ## Redis客户端连接端口
+  EXPOSE 6379
+  ## 集群总线端口:redis客户端连接的端口 + 10000
+  EXPOSE 16379
+  ENTRYPOINT ["docker-entrypoint.sh"]
+  CMD ["redis-server","/usr/local/redis/redis.conf"]
+
 redis.conf 示例:
 ::
   port 6379
@@ -156,6 +173,89 @@ docker-entrypoint.sh 文件示例
   echo cluster-announce-bus-port 1${PORT} >> /usr/local/redis/redis.conf
   
   exec "$@"
+
+docker-compose.yml 示例:
+::
+  ersion: "3.7"
+  ervices:
+   redis-1:
+     image: redis:v3
+     container_name: redis-1
+     networks:
+       net:
+         ipv4_address: 172.18.0.2
+     environment:
+       - PORT=7001
+     ports:
+       - "7001:6379"
+       - "17001:16379"
+   redis-2:
+     image: redis:v3
+     container_name: redis-2
+     networks:
+       net:
+         ipv4_address: 172.18.0.3
+     environment:
+       - PORT=7002
+     ports:
+       - "7002:6379"
+       - "17002:16379"
+   redis-3:
+     image: redis:v3
+     container_name: redis-3
+     networks:
+       net:
+         ipv4_address: 172.18.0.4
+     environment:
+       - PORT=7003
+     ports:
+       - "7003:6379"
+       - "17003:16379"
+   redis-4:
+     image: redis:v3
+     container_name: redis-4
+     networks:
+       net:
+         ipv4_address: 172.18.0.5
+     environment:
+       - PORT=7004
+     ports:
+       - "7004:6379"
+       - "17004:16379"
+   redis-5:
+     image: redis:v3
+     container_name: redis-5
+     networks:
+       net:
+         ipv4_address: 172.18.0.6
+     environment:
+       - PORT=7005
+     ports:
+       - "7005:6379"
+       - "17005:16379"
+   redis-6:
+     image: redis:v3
+     container_name: redis-6
+     networks:
+       net:
+         ipv4_address: 172.18.0.7
+     environment:
+       - PORT=7006
+     ports:
+       - "7006:6379"
+       - "17006:16379"
+  etworks:
+   net:
+     ipam:
+       config:
+         - subnet: 172.18.0.0/24
+
+创建集群命令,宿主机的IP是:192.168.1.139（容器内运行方式）
+::
+  docker run --rm --network redis_net -ti redis:v3 bash
+  echo yes | redis-cli --cluster create \
+   192.168.1.139:7001 192.168.1.139:7002 192.168.1.139:7003 192.168.1.139:7004 192.168.1.139:7005 192.168.1.139:7006 \
+   --cluster-replicas 1
 
 host网络模式配置
 =================
@@ -236,4 +336,6 @@ docker-entrypoint.sh 文件示例
 创建集群命令,宿主机的IP是:192.168.9.130（容器内运行方式）
 ::
   docker run --rm --network redis_net -ti redis:v3 bash
-  echo yes | redis-cli --cluster create 192.168.9.130:7001 192.168.9.130:7002 192.168.9.130:7003 192.168.9.130:7004 192.168.9.130:7005 192.168.9.130:7006 --cluster-replicas 1
+  echo yes | redis-cli --cluster create \
+   192.168.9.130:7001 192.168.9.130:7002 192.168.9.130:7003 192.168.9.130:7004 192.168.9.130:7005 192.168.9.130:7006 \
+   --cluster-replicas 1
