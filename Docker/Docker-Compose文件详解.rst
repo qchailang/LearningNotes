@@ -216,7 +216,6 @@ service定义 包含启动服务的每个容器的配置，就像把命令行参
      docker-compose up 将按依赖顺序启动服务。在以下示例中，db 和 redis 将在 web 之前启动。
 
      docker-compose up SERVICE 将自动包含 SERVICE 的依赖项。在以下示例中，docker-compose up web 还将创建并启动 db 和 redis 。
-
      ::
        version: '3'
        services:
@@ -237,6 +236,15 @@ service定义 包含启动服务的每个容器的配置，就像把命令行参
 
 #. pid
      将PID模式设置为主机PID模式，跟主机系统共享进程命名空间。容器使用这个标签将能够访问和操纵其他容器和宿主机的名称空间。
+
+#. network_mode
+    设置网络模式。 使用与docker client --net参数相同的值
+    ::
+      network_mode: "bridge"
+      network_mode: "host"
+      network_mode: "none"
+      network_mode: "service:[service name]"
+      network_mode: "container:[container name/id]"
 #. ports
      映射端口的标签。
 
