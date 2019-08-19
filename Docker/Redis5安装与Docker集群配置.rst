@@ -1,8 +1,32 @@
-=======================
+源码安装
+==========
+::
+
+  wget http://download.redis.io/releases/redis-5.0.5.tar.gz
+  tar -zxvf redis-5.0.5.tar.gz
+  cd redis-5.0.5
+  sudo make
+
+安装过程中出现的错误
+++++++++++++++++++++++
+* couldn’t execute “tclsh8.5”: no such file or directory
+   sudo apt install -y tcl
+* net.c:36:10: fatal error: sys/types.h: No such file or directory
+   sudo apt install -y libc6-dev
+
+若是通过：make install PREFIX=安装目录， 完成安装的，会在安装目录下生成一个bin目录，bin目录下包含如下可执行文件：
+
+* redis-benchmark ： 用于测试redis的性能。
+* redis-check-aof : 当aof备份文件被损坏，可通过该工具对aof文件进行修复，使用方式：redis-check-aof --fix 要修复的aof文件。
+* redis-check-rdb : 修复损坏的rdb备份文件。
+* redis-cli : redis客户端，用于连接服务端。
+* redis-server ： redis服务器端，用于启动redis服务器。
+* redis-sentinel : 哨兵模式 在master-slave模式下（slave默认不支持写），当master出现异常时，自动在slave中选择一台作为master。
+
 Redis 5 Docker集群配置
 =======================
 通用配置
-========
++++++++++
 Dockerfile 示例:
 ::
   #基础镜像
@@ -97,7 +121,7 @@ docker-compose.yml 示例:
       --cluster-replicas 1
 
 NATted的网络配置
-================
++++++++++++++++++
 在Redis Cluster集群模式下，集群的节点需要告诉用户或者是其他节点连接自己的IP和端口。
 默认情况下，Redis会自动检测自己的IP和从配置中获取绑定的PORT，告诉客户端或者是其他节点。而Docker使用了一种称为端口映射的技术：在Docker容器中运行的程序可能会暴露出与程序所使用的端口不同的端口。这对于在同一服务器上同时使用同一端口运行多个容器很有用，因此在Docker环境中，如果使用的不是host网络模式，在容器内部的IP和PORT对外都是隔离的，那么宿主机外部的客户端或其他节点就无法通过此节点公布的IP和PORT建立连接。
 
@@ -258,7 +282,7 @@ docker-compose.yml 示例:
    --cluster-replicas 1
 
 host网络模式配置
-=================
++++++++++++++++++
 docker-compose.yml 示例
 ::
   version: "3.7"
