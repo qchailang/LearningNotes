@@ -124,12 +124,13 @@ logback-logback.xml 配置示例
   <?xml version="1.0" encoding="UTF-8" ?>
   <configuration>
       <appender name="consoleLog" class="ch.qos.logback.core.ConsoleAppender">
-          <layout class="ch.qos.logback.classic.PatternLayout">
+          <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
               <pattern>
                   %d{yyyy-MM-dd HH:mm:ss} %highlight(%-5level) %cyan([%-50.50class]) : %boldYellow(%msg) %n
               </pattern>
-          </layout>
+          </encoder>
       </appender>
+  
       <!--info日志文件输出-->
       <appender name="fileInfoLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
           <!--只拦截info日志的配置-->
@@ -149,9 +150,10 @@ logback-logback.xml 配置示例
           <!--滚动策略：每天滚动生成-->
           <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
               <!--保存路径-->
-              <fileNamePattern>E:\workSpace\springbootTest\seller\log\info.%d.log</fileNamePattern>
+              <fileNamePattern>/home/qchailang/IdeaProjects/life/security/src/test/log/info.%d.log</fileNamePattern>
           </rollingPolicy>
       </appender>
+  
       <!--error日志文件输出-->
       <appender name="fileErrorLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
           <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -165,9 +167,11 @@ logback-logback.xml 配置示例
           <!--滚动策略-->
           <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
               <!--保存路径-->
-              <fileNamePattern>E:\workSpace\springbootTest\seller\log\error.%d.log</fileNamePattern>
+              <fileNamePattern>/home/qchailang/IdeaProjects/life/security/src/test/log/error.%d.log</fileNamePattern>
           </rollingPolicy>
       </appender>
+  
+  
       <root level="info">
           <!--控制台输出-->
           <appender-ref ref="consoleLog"/>
