@@ -26,7 +26,7 @@ logback的使用
       logger.info("hello world");
   }
 
-使用lombok的@Slf4j标签可以很方便的省略这个步骤，直接用log就可以了。
+使用lombok的@Slf4j注解可以很方便的省略这个步骤，直接用log就可以了。
 ::
   //加入lombok的依赖 
   <dependency>
@@ -37,6 +37,23 @@ logback的使用
 
 配置详解
 ========
+配置获取顺序
+++++++++++++++
+logback在启动的时候，会按照下面的顺序加载配置文件
+
+* 如果java程序启动时指定了logback.configurationFile属性，就用该属性指定的配置文件。如java -Dlogback.configurationFile=/path/to/mylogback.xml Test ，这样执行Test类的时候就会加载/path/to/mylogback.xml配置
+* 在classpath中查找  logback.groovy 文件
+* 在classpath中查找  logback-test.xml 文件
+* 在classpath中查找  logback.xml 文件
+* 如果是 jdk6+,那么会调用ServiceLoader 查找 com.qos.logback.classic.spi.Configurator接口的第一个实现类
+* 自动使用ch.qos.logback.classic.BasicConfigurator,在控制台输出日志
+
+上面的顺序表示优先级，使用java -D配置的优先级最高，只要获取到配置后就不会再执行下面的流程。
+
+SLF4j的日志输出级别
++++++++++++++++++++
+在slf4j中，从小到大的日志级别依旧是trace、debug、info、warn、error
+
 configuration节点相关属性
 ++++++++++++++++++++++++++
 ========== =========== ==================================================================
