@@ -1,6 +1,8 @@
 **********************************
 SpringBoot+MariaDB+MyBatis+Druid整合
 **********************************
+druid官网： https://github.com/alibaba/druid
+
 POM文件中加入的内容
 ===========
 .. code:: java
@@ -59,10 +61,27 @@ application.yml加入的内容
          session-stat-enable: false
        max-active: 10
        initial-size: 1
-
-druid官网： https://github.com/alibaba/druid
+ # mmapper xml文件路径与类别名设置。
+ mybatis:
+   mapper-locations: classpath:mapper/*Mapper.xml # Mapper xml文件路径。一般在resources目录下。
+   type-aliases-package: com.kulvv.life.entity # 这样设置后，在写xml文件时类的包名可省略。
 
 @Mapper和@MapperScan注解的用法
 ========================
- 在每个Mapper文件加上@Mapper注解，指定这是一个Mapper文件，但Mapper文件过多时，在每个Mapper文件上都加@Mapper注解也很麻烦，这时可用@MapperScan注解。每个Mapper文件上不用再加@Mapper注解，只用将@MapperScan注解加到启动入口类上，然后指定Mapper文件的路径就行了。
+在每个Mapper文件加上@Mapper注解，指定这是一个Mapper文件，但Mapper文件过多时，在每个Mapper文件上都加@Mapper注解也很麻烦，这时可用@MapperScan注解。每个Mapper文件上不用再加@Mapper注解，只用将@MapperScan注解加到启动类上，然后指定Mapper文件的路径就行了。
 
+Mapper xml文件详解
+==================
+.. code:: java
+
+  <?xml version="1.0" encoding="UTF-8" ?>
+  <!DOCTYPE mapper
+          PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.kulvv.life.security.mapper.UserInfoMapper">
+      <select id="getUserByUsername" parameterType="String" resultType="UserInfoDO">
+          SELECT id, username, password, status, descn
+          FROM user
+          where username = #{username}
+      </select>
+  </mapper>
