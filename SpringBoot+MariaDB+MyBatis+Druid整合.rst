@@ -206,9 +206,36 @@ resultType属性存在<select>标签中.负责将查询结果进行映射。
 * Pojo类型，User等
 * HashMap类型。
 
-使用resultType实现一对一
-+++++++++++++++++++++++++
+示例:
+------
+..code:: java
 
+  <?xml version="1.0" encoding="UTF-8" ?>
+  <!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.lion.mapper.UserMapper">
+    <select id="selectUser" parameterType="int" resultType="User">
+      select * from users where id = #{id}
+    </select>
+    
+    <delete id="deleteUser" parameterType="int">
+        delete from users where id = #{id}
+    </delete>
+    
+    
+    <update id="updateUser" parameterType="User">
+        update users set name = #{name},age = #{age} where id = #{id}
+    </update>
+     
+    <insert id="addUser" parameterType="User">
+        insert into users(name,age) values(#{name},#{age})
+    </insert>
+    
+    <select id="selectAll" resultType="User" >
+        select * from users
+    </select>
+  </mapper>
 
 resultMap – 映射复杂的结果对象
 -------------------------------
@@ -251,7 +278,7 @@ ResultMap 元素内置标签
 +++++++++++++++++++++++++++
 一对一的关系可以使用"association"，"javaType"进行配置。
 * association:用于将关联信息映射到单个pojo上。
-.. * property:要将关联信息映射到要查询的用户信息映射到Orders中那个属性。
+* property:要将关联信息映射到要查询的用户信息中的那个属性。
 * javaType:关联信息映射到orders的属性的类型，是User类型。
 
 .. code:: java
@@ -310,8 +337,8 @@ ResultMap 元素标签属性
 
 '#{}'与'${}'的区别
 -----------------------
-* #{} 实现的是sql语句的预处理参数，之后执行sql中用?号代替，使用时不需要关注数据类型，Mybatis自动实现数据类型的转换。并且可以防止SQL注入。 #{}只是做占位符，与参数名无关。
-* ${} 实现sql语句的直接拼接，不做数据类型转换，需要自行判断数据类型。不能防止SQL注入。
+* #{} 实现的是sql语句的预处理参数，之后执行sql中用?号代替，使用时不需要关注数据类型，Mybatis自动实现数据类型的转换。并且可以防止SQL注入。使用一个参数时，可以使用任意参数名称进行接收， #{}只是做占位符，与参数名无关。
+* ${} 实现sql语句的直接拼接，不做数据类型转换，需要自行判断数据类型。如果是字符串，需要手动添加引号。不能防止SQL注入。
 在大多数情况下,我们都是采用#{}读取参数内容.但是在一些特殊的情况下,我们还是需要使用${}读取参数的.
 
 比如 有两张表,分别是emp_2017 和 emp_2018 .如果需要在查询语句中动态指定表名,就只能使用${}
