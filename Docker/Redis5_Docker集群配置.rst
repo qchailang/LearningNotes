@@ -335,7 +335,13 @@ docker-entrypoint.sh 文件示例
 
 创建集群命令,宿主机的IP是:192.168.9.130（容器内运行方式）
 ::
-  docker run --rm --network redis_net -ti redis:v3 bash
+  docker run --rm --network host -ti redis:v3 bash
   echo yes | redis-cli --cluster create \
+   192.168.9.130:7001 192.168.9.130:7002 192.168.9.130:7003 192.168.9.130:7004 192.168.9.130:7005 192.168.9.130:7006 \
+   --cluster-replicas 1
+
+创建集群命令,宿主机的IP是:192.168.9.130（宿主机内运行方式）
+::
+  echo yes | docker run --rm --network host -i redis:v3 redis-cli --cluster create \
    192.168.9.130:7001 192.168.9.130:7002 192.168.9.130:7003 192.168.9.130:7004 192.168.9.130:7005 192.168.9.130:7006 \
    --cluster-replicas 1
