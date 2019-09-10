@@ -7,7 +7,7 @@ The startup configuration is specified in the file /etc/mysql/my.cnf, and that f
 做主从复制最重要的一点就是双方的server-id不能相同；
 
 在主服务器上只需要三步：
-#. 就是改server-id
+#. 改server-id
 #. 启用二进制日志
 #. 创建有复制权限的帐号
 
@@ -59,7 +59,6 @@ my.cnf 文件示例:
 
   查看从服务器状态
   show slave status\G;
-
 
 已有旧主，创建新从
 =================
