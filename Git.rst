@@ -101,3 +101,30 @@ git push了，因为这个指令会向两个分支同时推送。
 git push origin dev声明远程仓库。
 
 如果你本地开发的分支不是dev，那样就可以先切换到dev，然后把本地的代码和你开发的分支merge一下就可以提交了。
+
+一定要养成在项目开始就创建.gitignore文件的习惯，否则一旦push，处理起来会非常麻烦。
+
+当然如果已经push了怎么办?当然也有解决方法，如下：
+
+有时候在项目开发过程中，突然心血来潮想把某些目录或文件加入忽略规则，按照上述方法定义后发现并未生效，原因是.gitignore只能忽略那些原来没有被track的文件，如果某些文件已经被纳入了版本管理中，则修改.gitignore是无效的。那么解决方法就是先把本地缓存删除（改变成未track状态），然后再提交::
+
+ git rm -r --cached .
+ git add .
+ git commit -m 'xxxxx'
+
+文件.gitignore的格式规范：
+
+* #为注释
+* 可以使用shell所使用的正则表达式来进行模式匹配
+* 匹配模式最后跟"/"说明要忽略的是目录
+* 使用！取反
+
+例子::
+
+  # 此为注释 – 将被 Git 忽略
+   
+  *.a       # 忽略所有 .a 结尾的文件
+  !lib.a    # 但 lib.a 除外
+  /TODO     # 仅仅忽略项目根目录下的 TODO 文件，不包括 subdir/TODO
+  build/    # 忽略 build/ 目录下的所有文件
+  doc/*.txt # 会忽略 doc/notes.txt 但不包括 doc/server/arch.txt
