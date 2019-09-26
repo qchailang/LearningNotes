@@ -1,6 +1,7 @@
 Ext JS 6.2.0 学习
 =================
 官网文档：https://docs.sencha.com/extjs/6.2.0/index.html
+Sencha Cmd 下载地址：https://www.sencha.com/products/extjs/cmd-download/
 
 Ext.dom.Element 和 Ext.Component的区别。
 ---------------------------------------
