@@ -14,12 +14,12 @@ UML的图例
      
      在面向对象编程中，类是对现实世界中一组具有相同特征的物体的抽象。
 
-     .. image:: images/Class.png
+     .. image:: images/Class.jpg
    + 接口（Interface）
      
      在UML中，接口使用一个带有名称的小圆圈来进行表示。
 
-     .. image:: images/Interface.png
+     .. image:: images/Interface.jpg
    + 类图中关系（relation）
               
      * **泛化（Generalization）**

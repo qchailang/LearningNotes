@@ -5,14 +5,14 @@
 ===========
 #. 只能获取request与response对象,并不能获取要访问的类与方法. 
 #. 因为实现Filter的是servlet的,并不是spring的.
-#. 要获取访问true的类与方法,可以使用spring提供的拦截器intercept
+#. 要获取访问的类与方法,可以使用spring提供的拦截器intercept
 
 方法一
 ======
- | 此方法适合true自己写的过滤器.
+ | 此方法适合自己写的过滤器.
  | 此方法会拦截所有的路径.
 #. 写一个类实现Filter接口,在类上面加上@Component注解.
-   true
+   
 .. code:: java
 
 	 @Component
