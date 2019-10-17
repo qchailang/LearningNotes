@@ -17,6 +17,7 @@ Java 虚拟机栈
 局部变量表：存放了编译期可知的各种基本类型(boolean、byte、char、short、int、float、long、double)、对象引用(reference 类型)和 returnAddress 类型(指向了一条字节码指令的地址)
 
 StackOverflowError：线程请求的栈深度大于虚拟机所允许的深度。
+
 OutOfMemoryError：如果虚拟机栈可以动态扩展，而扩展时无法申请到足够的内存。
 
 本地方法栈
@@ -32,7 +33,7 @@ OutOfMemoryError：如果堆中没有内存完成实例分配，并且堆也无�
 
 #. JAVA对象优先在Eden区分配，当Eden区没有足够的空间时触发一次Minor GC ，触发Minor GC时，Eden和from区中的存活对象会被复制到to区，然后from和to交换指针，以保证下次Minor GC时，to区还是空的，如果survival区无法容纳的对象将通过分配担保机制直接进入老年区
 #. 分配担保机制可以通过HandlePromotionFailure配置，如果不允许的话，则直接发生FULL GC
-#. 新生代(Young Generation)的最大大小将根据总堆的最大大小和NewRatio参数的值来计算。参数的“不受限制”默认值MaxNewSize意味着计算值不受限制，MaxNewSize除非MaxNewSize在命令行中指定了值
+#. 新生代(Young Generation)的最大大小将根据总堆的最大大小和NewRatio参数的值来计算。缺省值是old的大小是young的2倍，edeg是Form,To的8倍，参数的“不受限制”默认值MaxNewSize意味着计算值不受限制，MaxNewSize除非MaxNewSize在命令行中指定了值
 #. 一般情况下，不允许-XX:Newratio值小于1，即Old要比Young大
 #. 大对象直接进入老年区的判断是根据PretenureSizeThreshold设置的阈值，所谓大对象时指需要大量连续内存空间的Java对象，最典型的大对象就是那种很长的字符串以及数组。
 
