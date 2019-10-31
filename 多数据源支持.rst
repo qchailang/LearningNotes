@@ -1,0 +1,92 @@
+一、定义多个数据源的mybatis配置
+
+application.properties 内容
+
+.. code::
+
+  mybatis.mapper-locations=mappers/*.xml
+  mybatisLog.mapper-locations=mappersLog/*.xml
+  
+  ## datasource master #
+  spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+  spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+  spring.datasource.url=jdbc:mysql://localhost:3306/test1?characterEncoding=UTF-8
+  spring.datasource.username=root
+  spring.datasource.password=466420182
+  
+  ## datasource log #
+  spring.datasourceLog.type=com.alibaba.druid.pool.DruidDataSource
+  spring.datasourceLog.driver-class-name=com.mysql.jdbc.Driver
+  spring.datasourceLog.url=jdbc:mysql://localhost:3306/log?characterEncoding=UTF-8
+  spring.datasourceLog.username=root
+  spring.datasourceLog.password=466420182
+
+二、定义多个数据源
+
+.. code::
+
+  @Configuration
+  public class DatasourceConfig {
+      @Bean(destroyMethod = "close", name = "master_db")
+      @ConfigurationProperties(prefix = "spring.datasource")
+      public DataSource dataSource() {
+          return DataSourceBuilder.create().type(DruidDataSource.class).build();
+      }
+  
+      @Bean(destroyMethod =  "close", name = "log_db")
+      @ConfigurationProperties(prefix = "spring.datasourceLog")
+      public DataSource dataSourceLog() {
+          return DataSourceBuilder.create().type(DruidDataSource.class).build();
+      }
+  }
+
+三、分别配置多个数据源
+
+.. code::
+
+  @Configuration
+  @MapperScan(basePackages = {"com.mmall.practice.dao"})
+  public class MybatisConfig {
+  
+      @Autowired
+      @Qualifier("master_db")
+      private DataSource masterDB;
+  
+      @Bean
+      @Primary
+      @ConfigurationProperties(prefix = "mybatis")
+      public SqlSessionFactoryBean sqlSessionFactoryBean() {
+          SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
+          sqlSessionFactoryBean.setDataSource(masterDB);
+          return sqlSessionFactoryBean;
+      }
+  }
+
+  @Configuration
+  @MapperScan(basePackages = {"com.mmall.practice.daoLog"}, sqlSessionFactoryRef = "logSqlSessionFactory")
+  public class MybatisLogConfig {
+  
+      @Autowired
+      @Qualifier("log_db")
+      private DataSource logDB;
+  
+      @Bean(name = "logSqlSessionFactory")
+      @ConfigurationProperties(prefix = "mybatisLog")
+      public SqlSessionFactoryBean sqlSessionFactoryBean() {
+          SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
+          sqlSessionFactoryBean.setDataSource(logDB);
+          return sqlSessionFactoryBean;
+      }
+  }
+
+这里需要注意两个数据源配置的差别，也是支持多数据源的关键
+
+1）Configuration 扫描不同的前缀，取不同包下的sql对应的xml文件
+
+2）SqlSessionFactoryBean 实例化时，默认的额外添加了 @Primary注解
+
+3）MapperScan 扫描的不同的包，如果扫描相同的包也能做，但是还需要做额外的配置。
+
+4）不同的数据源使用不同的SqlSessionFactoryBean实例
+
+5）代码中的Primary注解表示这是默认数据源。
