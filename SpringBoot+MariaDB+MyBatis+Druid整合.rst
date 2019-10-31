@@ -68,7 +68,7 @@ application.yml加入的内容
 
 @Mapper和@MapperScan注解的用法
 ========================
-在每个Mapper文件加上@Mapper注解，指定这是一个Mapper文件，但Mapper文件过多时，在每个Mapper文件上都加@Mapper注解也很麻烦，这时可用@MapperScan注解。每个Mapper文件上不用再加@Mapper注解，只用将@MapperScan注解加到启动类上，然后指定Mapper文件的路径就行了。
+在每个Mapper文件加上@Mapper注解，指定这是一个Mapper文件，但Mapper文件过多时，在每个Mapper文件上都加@Mapper注解也很麻烦，这时可用@MapperScan注解。每个Mapper文件上不用再加@Mapper注解，只用将@MapperScan注解加到一个配置类上，然后指定Mapper文件的路径就行了。
 
 Mybatis Mapper动态代理开发步骤
 =======================
