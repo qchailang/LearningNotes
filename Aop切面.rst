@@ -99,4 +99,492 @@ exection(访问修饰符 类全路径.方法名(参数)
 在被增强的类中配制，配制切点，如果省略id属性，切点的名称就是方法名第一个字母小写
 
 
-在 Spring AOP 中，使用 @Aspect 注解标识一个类是一个切面，然后在切面中定义切点（pointcut）和 增强（advice）：
+在 Spring AOP 中，使用 @Aspect 注解标识一个类是一个切面，然后在切面中定义切点（pointcut）和 增强（advice）
+
+
+定义需要 aop 拦截的方法，模拟一个 User 的增删改操作：
+
+接口：
+
+public interface IUserService {
+    void add(User user);
+    User query(String name);
+    List<User> qyertAll();
+    void delete(String name);
+    void update(User user);
+}
+
+接口实现：
+
+@Service("userServiceImpl")
+public class UserServiceImpl implements IUserService {
+
+    @Override
+    public void add(User user) {
+        System.out.println("添加用户成功，user=" + user);
+    }
+
+    @Override
+    public User query(String name) {
+        System.out.println("根据name查询用户成功");
+        User user = new User(name, 20, 1, 1000, "java");
+        return user;
+    }
+
+    @Override
+    public List<User> qyertAll() {
+        List<User> users = new ArrayList<>(2);
+        users.add(new User("zhangsan", 20, 1, 1000, "java"));
+        users.add(new User("lisi", 25, 0, 2000, "Python"));
+        System.out.println("查询所有用户成功, users = " + users);
+        return users;
+    }
+
+    @Override
+    public void delete(String name) {
+        System.out.println("根据name删除用户成功, name = " + name);
+    }
+
+    @Override
+    public void update(User user) {
+        System.out.println("更新用户成功, user = " + user);
+    }
+}
+
+3. 定义 AOP 切面
+
+在 Spring AOP 中，使用 @Aspect  注解标识的类就是一个切面，然后在切面中定义切点（pointcut）和 增强（advice）：
+
+3.1 前置增强，@Before()，在目标方法执行之前执行
+
+@Component
+@Aspect
+public class UserAspectj {
+
+    // 在方法执行之前执行
+    @Before("execution(* main.tsmyk.mybeans.inf.IUserService.add(..))")
+    public void before_1(){
+        System.out.println("log: 在 add 方法之前执行....");
+    }
+}
+
+上述的方法 before_1() 是对接口的 add() 方法进行 前置增强，即在 add() 方法执行之前执行，
+
+测试：
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("/resources/myspring.xml")
+public class TestBean {
+
+    @Autowired
+    private IUserService userServiceImpl;
+
+    @Test
+    public void testAdd() {
+        User user = new User("zhangsan", 20, 1, 1000, "java");
+        userServiceImpl.add(user);
+    }
+}
+// 结果：
+// log: 在 add 方法之前执行....
+// 添加用户成功，user=User{name='zhangsan', age=20, sex=1, money=1000.0, job='java'}
+
+如果想要获取目标方法执行的参数等信息呢，我们可在 切点的方法中添参数 JoinPoint ，通过它了获取目标对象的相关信息：
+
+    @Before("execution(* main.tsmyk.mybeans.inf.IUserService.add(..))")
+    public void before_2(JoinPoint joinPoint){
+        Object[] args = joinPoint.getArgs();
+        User user = null;
+        if(args[0].getClass() == User.class){
+            user = (User) args[0];
+        }
+        System.out.println("log: 在 add 方法之前执行, 方法参数 = " + user);
+    }
+
+重新执行上述测试代码，结果如下：
+
+// log: 在 add 方法之前执行, 方法参数 = User{name='zhangsan', age=20, sex=1, money=1000.0, job='java'}
+// 添加用户成功，user=User{name='zhangsan', age=20, sex=1, money=1000.0, job='java'}
+
+3.2 后置增强，@After()，在目标方法执行之后执行，无论是正常退出还是抛异常，都会执行
+
+    // 在方法执行之后执行
+    @After("execution(* main.tsmyk.mybeans.inf.IUserService.add(..))")
+    public void after_1(){
+        System.out.println("log: 在 add 方法之后执行....");
+    }
+
+执行 3.1 的测试代码，结果如下：
+
+// 添加用户成功，user=User{name='zhangsan', age=20, sex=1, money=1000.0, job='java'}
+// log: ==== 方法执行之后 =====
+
+3.3 返回增强，@AfterReturning()，在目标方法正常返回后执行，出现异常则不会执行，可以获取到返回值：
+
+@AfterReturning(pointcut="execution(* main.tsmyk.mybeans.inf.IUserService.query(..))", returning="object")
+public void after_return(Object object){
+    System.out.println("在 query 方法返回后执行, 返回值= " + object);
+}
+
+测试：
+
+@Test
+public void testQuery() {
+	userServiceImpl.query("zhangsan");
+}
+// 结果：
+// 根据name查询用户成功
+// 在 query 方法返回后执行, 返回值= User{name='zhangsan', age=20, sex=1, money=1000.0, job='java'}
+
+当一个方法同时被 @After() 和 @AfterReturning() 增强的时候，先执行哪一个呢？
+
+@AfterReturning(pointcut="execution(* main.tsmyk.mybeans.inf.IUserService.query(..))", returning="object")
+public void after_return(Object object){
+	System.out.println("===log: 在 query 方法返回后执行, 返回值= " + object);
+}
+
+@After("execution(* main.tsmyk.mybeans.inf.IUserService.query(..))")
+public void after_2(){
+	System.out.println("===log: 在 query 方法之后执行....");
+}
+
+测试：
+
+// 根据name查询用户成功
+// ===log: 在 query 方法之后执行....
+// ===log: 在 query 方法返回后执行, 返回值= User{name='zhangsan', age=20, sex=1, money=1000.0, job='java'}
+
+可以看到，即使 @After() 放在  @AfterReturning() 的后面，它也先被执行，即 @After() 在 @AfterReturning() 之前执行。
+
+3.4 异常增强，@AfterThrowing，在抛出异常的时候执行，不抛异常不执行。
+
+@AfterThrowing(pointcut="execution(* main.tsmyk.mybeans.inf.IUserService.query(..))", throwing = "ex")
+public void after_throw(Exception ex){
+	System.out.println("在 query 方法抛异常时执行, 异常= " + ex);
+}
+
+现在来修改一下它增强的 query() 方法，让它抛出异常：
+
+@Override
+public User query(String name) {
+	System.out.println("根据name查询用户成功");
+	User user = new User(name, 20, 1, 1000, "java");
+	int a = 1/0;
+	return user;
+}
+
+测试：
+
+@Test
+public void testQuery() {
+	userServiceImpl.query("zhangsan");
+}
+
+// 结果：
+// 在 query 方法抛异常时执行, 异常= java.lang.ArithmeticException: / by zero
+// java.lang.ArithmeticException: / by zero ...........
+
+3.5 环绕增强，@Around，在目标方法执行之前和之后执行
+
+// 目标方法：
+@Override
+public void update(User user) {
+    System.out.println("更新用户成功, user = " + user);
+}
+
+@Around("execution(* main.tsmyk.mybeans.inf.IUserService.delete(..))")
+public void test_around(ProceedingJoinPoint joinPoint) throws Throwable {
+	Object[] args = joinPoint.getArgs();
+	System.out.println("log : delete 方法执行之前, 参数 = " + args[0].toString());
+	joinPoint.proceed();
+	System.out.println("log : delete 方法执行之后");
+}
+
+测试：
+
+@Test
+public void test5(){
+    userServiceImpl.delete("zhangsan");
+}
+
+// 结果：
+// log : delete 方法执行之前, 参数 = zhangsan
+// 根据name删除用户成功, name = zhangsan
+// log : delete 方法执行之后
+
+以上就是 Spring AOP 的几种增强。
+
+上面的栗子中，在每个方法上方的切点表达式都需要写一遍，现在可以使用 @Pointcut 来声明一个可重用的切点表达式，之后在每个方法的上方引用这个切点表达式即可。：
+
+// 声明 pointcut
+@Pointcut("execution(* main.tsmyk.mybeans.inf.IUserService.query(..))")
+public void pointcut(){
+}
+
+@Before("pointcut()")
+public void before_3(){
+	System.out.println("log: 在 query 方法之前执行");
+}
+@After("pointcut()")
+public void after_4(){
+	System.out.println("log: 在 query 方法之后执行....");
+}
+
+指示符
+
+在上面的栗子中，使用了 execution 指示符，它用来匹配方法执行的连接点，也是 Spring AOP 使用的主要指示符，在切点表达式中使用了 通配符 (*)  和  (.. )，其中，(* )可以表示任意方法，任意返回值，(..)表示方法的任意参数 ，接下来来看下其他的指示符。
+1. within
+
+匹配特定包下的所有类的所有 Joinpoint（方法），包括子包，注意是所有类，而不是接口，如果写的是接口，则不会生效，如 within(main.tsmyk.mybeans.impl.* 将会匹配 main.tsmyk.mybeans.impl 包下所有类的所有 Join point；within(main.tsmyk.mybeans.impl..* 两个点将会匹配该包及其子包下的所有类的所有 Join point。
+
+栗子：
+
+@Pointcut("within(main.tsmyk.mybeans.impl.*)")
+public void testWithin(){
+}
+
+@Before("testWithin()")
+public void test_within(){
+	System.out.println("test within 在方法执行之前执行.....");
+}
+
+执行该包下的类 UserServiceImpl 的 delete 方法，结果如下：
+
+@Test
+public void test5(){
+	userServiceImpl.delete("zhangsan");
+}
+
+// 结果：
+// test within 在方法执行之前执行.....
+// 根据name删除用户成功, name = zhangsan
+
+2. @within
+
+匹配所有持有指定注解类型的方法，如 @within(Secure)，任何目标对象持有Secure注解的类方法；必须是在目标对象上声明这个注解，在接口上声明的对它不起作用。
+3. target
+
+匹配的是一个目标对象，target(main.tsmyk.mybeans.inf.IUserService) 匹配的是该接口下的所有 Join point ：
+
+@Pointcut("target(main.tsmyk.mybeans.inf.IUserService)")
+public void anyMethod(){
+}
+
+@Before("anyMethod()")
+public void beforeAnyMethod(){
+	System.out.println("log: ==== 方法执行之前 =====");
+}
+
+@After("anyMethod()")
+public void afterAnyMethod(){
+	System.out.println("log: ==== 方法执行之后 =====");
+}
+
+之后，执行该接口下的任意方法，都会被增强。
+3. @target
+
+匹配一个目标对象，这个对象必须有特定的注解，如 
+
+@target(org.springframework.transaction.annotation.Transactional) 匹配任何 有 @Transactional 注解的 方法
+4. this
+
+匹配当前AOP代理对象类型的执行方法，this(service.IPointcutService)，当前AOP对象实现了 IPointcutService接口的任何方法
+5. arg
+
+匹配参数，
+
+    // 匹配只有一个参数 name 的方法
+    @Before("execution(* main.tsmyk.mybeans.inf.IUserService.query(String)) && args(name)")
+    public void test_arg(){
+
+    }
+
+    // 匹配第一个参数为 name 的方法
+    @Before("execution(* main.tsmyk.mybeans.inf.IUserService.query(String)) && args(name, ..)")
+    public void test_arg2(){
+
+    }
+    
+    // 匹配第二个参数为 name 的方法
+    @Before("execution(* main.tsmyk.mybeans.inf.IUserService.query(String)) && args(*, name, ..)")
+    public void test_arg3(){
+
+    }
+
+6. @arg
+
+匹配参数，参数有特定的注解，@args(Anno))，方法参数标有Anno注解。
+7. @annotation
+
+匹配特定注解
+
+@annotation(org.springframework.transaction.annotation.Transactional) 匹配 任何带有 @Transactional 注解的方法。
+8. bean 
+
+匹配特定的 bean 名称的方法
+
+    // 匹配 bean 的名称为 userServiceImpl 的所有方法
+    @Before("bean(userServiceImpl)")
+    public void test_bean(){
+        System.out.println("===================");
+    }
+
+    // 匹配 bean 名称以 ServiceImpl 结尾的所有方法
+    @Before("bean(*ServiceImpl)")
+    public void test_bean2(){
+        System.out.println("+++++++++++++++++++");
+    }
+
+测试：
+
+执行该bean下的方法：
+
+@Test
+public void test5(){
+	userServiceImpl.delete("zhangsan");
+}
+//结果：
+// ===================
+// +++++++++++++++++++
+// 根据name删除用户成功, name = zhangsan
+
+以上就是 Spring AOP 所有的指示符的使用方法了。
+
+
+Spring AOP 原理
+
+Spring AOP 的底层使用的使用 动态代理；共有两种方式来实现动态代理，一个是 JDK 的动态代理，一种是 CGLIB 的动态代理，下面使用这两种方式来实现以上面的功能，即在调用 UserServiceImpl 类方法的时候，在方法执行之前和之后加上日志。
+JDK 动态代理
+
+实现 JDK 动态代理，必须要实现 InvocationHandler 接口，并重写 invoke 方法：
+
+public class UserServiceInvocationHandler implements InvocationHandler {
+
+    // 代理的目标对象
+    private Object target;
+
+    public UserServiceInvocationHandler(Object target) {
+        this.target = target;
+    }
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+
+        System.out.println("log: 目标方法执行之前, 参数 = " + args);
+
+        // 执行目标方法
+        Object retVal = method.invoke(target, args);
+
+        System.out.println("log: 目标方法执行之后.....");
+
+        return retVal;
+    }
+}
+
+测试：
+
+public static void main(String[] args) throws IOException {
+
+	// 需要代理的对象
+	IUserService userService = new UserServiceImpl();
+	InvocationHandler handler = new UserServiceInvocationHandler(userService);
+	ClassLoader classLoader = userService.getClass().getClassLoader();
+	Class[] interfaces = userService.getClass().getInterfaces();
+
+	// 代理对象
+	IUserService proxyUserService = (IUserService) Proxy.newProxyInstance(classLoader, interfaces, handler);
+
+	System.out.println("动态代理的类型  = " + proxyUserService.getClass().getName());
+	proxyUserService.query("zhangsan");
+    
+    // 把字节码写到文件
+    byte[] bytes = ProxyGenerator.generateProxyClass("$Proxy", new Class[]{UserServiceImpl.class});
+    FileOutputStream fos =new FileOutputStream(new File("D:/$Proxy.class"));
+    fos.write(bytes);
+    fos.flush();
+
+}
+
+结果：
+
+动态代理的类型  = com.sun.proxy.$Proxy0
+log: 目标方法执行之前, 参数 = [Ljava.lang.Object;@2ff4acd0
+根据name查询用户成功
+log: 目标方法执行之后.....
+
+可以看到在执行目标方法的前后已经打印了日志；刚在上面的 main 方法中，我们把代理对象的字节码写到了文件里，现在来分析下：
+
+反编译 &Proxy.class 文件如下：
+
+可以看到它通过实现接口来实现的。
+
+JDK 只能代理那些实现了接口的类，如果一个类没有实现接口，则无法为这些类创建代理。此时可以使用 CGLIB 来进行代理。
+CGLIB 动态代理
+
+接下来看下 CGLIB 是如何实现的。
+
+首先新建一个需要代理的类，它没有实现任何接口：
+
+public class UserServiceImplCglib{
+    public User query(String name) {
+        System.out.println("根据name查询用户成功, name = " + name);
+        User user = new User(name, 20, 1, 1000, "java");
+        return user;
+    }
+}
+
+现在需要使用 CGLIB 来实现在方法 query 执行的前后加上日志：
+
+使用 CGLIB 来实现动态代理，也需要实现接口 MethodInterceptor，重写 intercept 方法：
+
+public class CglibMethodInterceptor implements MethodInterceptor {
+
+    @Override
+    public Object intercept(Object obj, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+
+        System.out.println("log: 目标方法执行之前, 参数 = " + args);
+
+        Object retVal = methodProxy.invokeSuper(obj, args);
+
+        System.out.println("log: 目标方法执行之后, 返回值 = " + retVal);
+        return retVal;
+    }
+}
+
+测试：
+
+public static void main(String[] args) {
+
+	// 把代理类写入到文件
+	System.setProperty(DebuggingClassWriter.DEBUG_LOCATION_PROPERTY, "D:\\");
+
+	Enhancer enhancer = new Enhancer();
+	enhancer.setSuperclass(UserServiceImplCglib.class);
+	enhancer.setCallback(new CglibMethodInterceptor());
+
+	// 创建代理对象
+	UserServiceImplCglib userService = (UserServiceImplCglib) enhancer.create();
+	System.out.println("动态代理的类型 = " + userService.getClass().getName());
+
+	userService.query("zhangsan");
+}
+
+结果：
+
+动态代理的类型 = main.tsmyk.mybeans.impl.UserServiceImplCglib$$EnhancerByCGLIB$$772edd85
+log: 目标方法执行之前, 参数 = [Ljava.lang.Object;@77556fd
+根据name查询用户成功, name = zhangsan
+log: 目标方法执行之后, 返回值 = User{name='zhangsan', age=20, sex=1, money=1000.0, job='java'}
+
+可以看到，结果和使用 JDK 动态代理的一样，此外，可以看到代理类的类型为 main.tsmyk.mybeans.impl.UserServiceImplCglib$$EnhancerByCGLIB$$772edd85，它是 UserServiceImplCglib 的一个子类，即 CGLIB 是通过 继承的方式来实现的。
+总结
+
+1. JDK 的动态代理是通过反射和拦截器的机制来实现的，它会为代理的接口生成一个代理类。
+
+2. CGLIB 的动态代理则是通过继承的方式来实现的，把代理类的class文件加载进来，通过修改其字节码生成子类的方式来处理。
+
+3. JDK 动态代理只能对实现了接口的类生成代理，而不能针对类。
+
+4. CGLIB是针对类实现代理，主要是对指定的类生成一个子类，覆盖其中的方法，但是因为采用的是继承， 所以 final 类或方法无法被代理。
+
+5. Spring AOP 中，如果实现了接口，默认使用的是 JDK 代理，也可以强制使用 CGLIB 代理，如果要代理的类没有实现任何接口，则会使用 CGLIB 进行代理，Spring 会进行自动的切换。
