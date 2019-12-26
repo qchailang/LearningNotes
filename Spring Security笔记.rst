@@ -4,6 +4,8 @@ Spring Security笔记
 Spring Security配置
 =================
 .. image:: images/Security过滤器链.png
+**SecurityContextPersistenceFilter** 的作用：当请求进入时，检查session里是否有SecurityContext，如果有，就将SecurityContext放入线程中；当响应时，检查线程中是否有SecurityContext，如果有就将SecurityContext放入session中。
+
 *实际开发中过滤器链中不止这三种过滤器，我们可以通过在过滤器链上增加绿色的过滤器来支持不同的身份认证方式，我们只可以通过配置决定绿色的这类过滤器哪个生效，另两种过滤器是不受控制的，它们一定会出现在指定的位置*
 
 1. 写一个Security的配置类，继承 **WebSecurityConfigurerAdapter类，** 重写 **protected void configure(HttpSecurity http)** 方法.
@@ -49,3 +51,12 @@ Spring Security配置
  Security 的实现类\ **SavedRequestAwareAuthenticationSuccessHandler**
 6. 自定义登录失败处理器。实现AuthenticationFailureHandler接口
  Security 的实现类\ **SimpleUrlAuthenticationFailureHandler**
+public class ValidateCodeSecurityConfig extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
+
+    @Autowired
+    private Filter validateCodeFilter;
+
+    @Override
+    public void configure(HttpSecurity http) {
+        http.addFilterBefore(validateCodeFilter, AbstractPreAuthenticatedProcessingFilter.class);
+    }

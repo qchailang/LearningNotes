@@ -5,7 +5,7 @@ Sencha Cmd 下载地址：https://www.sencha.com/products/extjs/cmd-download/
 
 Ext.dom.Element 和 Ext.Component的区别。
 ---------------------------------------
-Ext.dom.Element对象是对dom对象的封装，目的是为了跨平台以及增加一些有用的方法。但是Ext.com.Element是不包含外观的，封装的dom原来是怎么样就是怎么样。A	Q`Ext在Element的基础上进一步封装，产生了Component类，这些类含有外观，也就是多加入了一些html之类的进去，更方便开发者使用。 
+Ext.dom.Element对象是对dom对象的封装，目的是为了跨平台以及增加一些有用的方法。但是Ext.com.Element是不包含外观的，封装的dom原来是怎么样就是怎么样。Ext在Element的基础上进一步封装，产生了Component类，这些类含有外观，也就是多加入了一些html之类的进去，更方便开发者使用。 
 
 因此在Component中可以通过el属性来访问该Component所依赖的Element，同样的，Element也可以通过dom属性来访问Element对象所依赖的dom。
 

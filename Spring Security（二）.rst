@@ -1,6 +1,10 @@
 
-FilterInvocationSecurityMetadataSource
+https://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/
+
+FilterInvocationSecurityMetadataSource (DefaultFilterInvocationSecurityMetadataSource)
+
 SecurityMetadataSource
+
 SecurityMetadataSource是一个接口，同时还有一个接口FilterInvocationSecurityMetadataSource继承于它，但FilterInvocationSecurityMetadataSource只是一个标识接口，对应于FilterInvocation，本身并无任何内容：
 
 因为我们做的一般都是web项目，所以实际需要实现的接口是FilterInvocationSecurityMetadataSource，这是因为Spring Security中很多web才使用的类参数类型都是FilterInvocationSecurityMetadataSource。
@@ -59,6 +63,33 @@ AccessDecisionManager 鉴权
 
 Spring Security Web表单方式登录与授权主要流程
 ===================================
+
+标准身份验证方案。
+
+    提示用户使用用户名和密码登录。
+
+    系统（成功）验证密码对用户名是否正确。
+
+    获取该用户的上下文信息（其角色列表等）。
+
+    为用户建立安全上下文
+
+    用户可能会继续执行某些操作，该操作可能受访问控制机制保护，访问控制机制会针对当前安全上下文信息检查操作所需的权限。
+
+前三项构成了认证过程，因此我们将在Spring Security中看看这些是如何发生的。
+
+    获取用户名和密码并将其合并到UsernamePasswordAuthenticationToken（Authentication界面的一个实例，我们之前看到）的一个实例中。
+
+    将令牌传递给AuthenticationManager的实例进行验证。
+
+    AuthenticationManager在成功验证时返回完全填充的Authentication实例。
+
+    通过调用SecurityContextHolder.getContext().setAuthentication(…​)传入返回的认证对象来建立安全上下文。
+
+从那时起，用户被认为是被认证的。
+
+SavedRequest和RequestCache接口
+
 认证
 -------
 用户登录请求首先会被UsernamePasswordAuthenticationFilter(AuthenticationProcessingFilter的子类)拦截，通过ProviderManager（AuthenticationManager接口的实现类）来获取用户认证信息，如果认证通过后会将用户的权限信息封装一个UserDetails对象中，然后放到spring的全局缓存SecurityContextHolder中，以备后面访问资源时使用。
