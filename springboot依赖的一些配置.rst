@@ -37,6 +37,38 @@ springboot里会引入很多springboot starter依赖，这些依赖的版本号�
       </dependencies>
   </dependencyManagement>
 
+例3：import导入的方式
+
+.. code:: java
+
+  <dependencyManagement>
+      <dependencies>
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-parent</artifactId>
+          <version>2.2.2.RELEASE</version>
+          <type>pom</type>
+          <scope>import</scope>
+        </dependency>
+      </dependencies>
+  </dependencyManagement>
+
+例3：import导入的方式
+
+.. code:: java
+
+  <dependencyManagement>
+      <dependencies>
+        <dependency>
+          <groupId>io.spring.platform</groupId>
+          <artifactId>platform-bom</artifactId>
+          <version>Cairo-SR8</version>
+          <type>pom</type>
+          <scope>import</scope>
+        </dependency>
+      </dependencies>
+  </dependencyManagement>
+
 spring-boot-dependencies、spring-boot-starter-parent、io.spring.platform三者的关系,区别．
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 1.spring-boot-starter-parent继承spring-boot-dependencies
