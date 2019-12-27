@@ -24,9 +24,11 @@ Docker安装
 镜像加速
 -------
 鉴于国内网络问题，后续拉取 Docker 镜像十分缓慢，我们可以需要配置加速器来解决，新版的 Docker 使用 /etc/docker/daemon.json（Linux）, 请在该配置文件中加入（没有该文件的话，请先建一个）
+
+Windows路径为：%programdata%\docker\config\daemon.json
 ::
  {
-  "registry-mirrors": ["http://hub-mirror.c.163.com"],
+  "registry-mirrors": ["https://a23t7aka.mirror.aliyuncs.com"]
   "insecure-registries": ["myregistry:5000"] // 告诉docker daemon myregistry:5000是不安全的registry
  }
 
