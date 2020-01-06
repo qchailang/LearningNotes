@@ -77,7 +77,7 @@ Advice注解一共有五种，分别是：
 
 在Spring中，通过动态代理和动态字节码技术实现了AOP
 
-使用表达式配置切入点
+使用表达式配置切点
 
 exection(访问修饰符 类全路径.方法名(参数)
 
@@ -98,9 +98,7 @@ exection(访问修饰符 类全路径.方法名(参数)
 
 在被增强的类中配制，配制切点，如果省略id属性，切点的名称就是方法名第一个字母小写
 
-
 在 Spring AOP 中，使用 @Aspect 注解标识一个类是一个切面，然后在切面中定义切点（pointcut）和 增强（advice）
-
 
 定义需要 aop 拦截的方法，模拟一个 User 的增删改操作：
 
@@ -153,7 +151,7 @@ public class UserServiceImpl implements IUserService {
 
 3. 定义 AOP 切面
 
-在 Spring AOP 中，使用 @Aspect  注解标识的类就是一个切面，然后在切面中定义切点（pointcut）和 增强（advice）：
+在 Spring AOP 中，使用 @Aspect 注解标识的类是一个切面，然后在切面中定义切点（pointcut）和 增强（advice）：
 
 3.1 前置增强，@Before()，在目标方法执行之前执行
 
@@ -170,25 +168,6 @@ public class UserAspectj {
 
 上述的方法 before_1() 是对接口的 add() 方法进行 前置增强，即在 add() 方法执行之前执行，
 
-测试：
-
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("/resources/myspring.xml")
-public class TestBean {
-
-    @Autowired
-    private IUserService userServiceImpl;
-
-    @Test
-    public void testAdd() {
-        User user = new User("zhangsan", 20, 1, 1000, "java");
-        userServiceImpl.add(user);
-    }
-}
-// 结果：
-// log: 在 add 方法之前执行....
-// 添加用户成功，user=User{name='zhangsan', age=20, sex=1, money=1000.0, job='java'}
-
 如果想要获取目标方法执行的参数等信息呢，我们可在 切点的方法中添参数 JoinPoint ，通过它了获取目标对象的相关信息：
 
     @Before("execution(* main.tsmyk.mybeans.inf.IUserService.add(..))")
@@ -201,11 +180,6 @@ public class TestBean {
         System.out.println("log: 在 add 方法之前执行, 方法参数 = " + user);
     }
 
-重新执行上述测试代码，结果如下：
-
-// log: 在 add 方法之前执行, 方法参数 = User{name='zhangsan', age=20, sex=1, money=1000.0, job='java'}
-// 添加用户成功，user=User{name='zhangsan', age=20, sex=1, money=1000.0, job='java'}
-
 3.2 后置增强，@After()，在目标方法执行之后执行，无论是正常退出还是抛异常，都会执行
 
     // 在方法执行之后执行
@@ -214,27 +188,12 @@ public class TestBean {
         System.out.println("log: 在 add 方法之后执行....");
     }
 
-执行 3.1 的测试代码，结果如下：
-
-// 添加用户成功，user=User{name='zhangsan', age=20, sex=1, money=1000.0, job='java'}
-// log: ==== 方法执行之后 =====
-
 3.3 返回增强，@AfterReturning()，在目标方法正常返回后执行，出现异常则不会执行，可以获取到返回值：
 
 @AfterReturning(pointcut="execution(* main.tsmyk.mybeans.inf.IUserService.query(..))", returning="object")
 public void after_return(Object object){
     System.out.println("在 query 方法返回后执行, 返回值= " + object);
 }
-
-测试：
-
-@Test
-public void testQuery() {
-	userServiceImpl.query("zhangsan");
-}
-// 结果：
-// 根据name查询用户成功
-// 在 query 方法返回后执行, 返回值= User{name='zhangsan', age=20, sex=1, money=1000.0, job='java'}
 
 当一个方法同时被 @After() 和 @AfterReturning() 增强的时候，先执行哪一个呢？
 
@@ -248,13 +207,7 @@ public void after_2(){
 	System.out.println("===log: 在 query 方法之后执行....");
 }
 
-测试：
-
-// 根据name查询用户成功
-// ===log: 在 query 方法之后执行....
-// ===log: 在 query 方法返回后执行, 返回值= User{name='zhangsan', age=20, sex=1, money=1000.0, job='java'}
-
-可以看到，即使 @After() 放在  @AfterReturning() 的后面，它也先被执行，即 @After() 在 @AfterReturning() 之前执行。
+即使 @After() 放在  @AfterReturning() 的后面，它也先被执行，即 @After() 在 @AfterReturning() 之前执行。
 
 3.4 异常增强，@AfterThrowing，在抛出异常的时候执行，不抛异常不执行。
 
@@ -273,24 +226,7 @@ public User query(String name) {
 	return user;
 }
 
-测试：
-
-@Test
-public void testQuery() {
-	userServiceImpl.query("zhangsan");
-}
-
-// 结果：
-// 在 query 方法抛异常时执行, 异常= java.lang.ArithmeticException: / by zero
-// java.lang.ArithmeticException: / by zero ...........
-
 3.5 环绕增强，@Around，在目标方法执行之前和之后执行
-
-// 目标方法：
-@Override
-public void update(User user) {
-    System.out.println("更新用户成功, user = " + user);
-}
 
 @Around("execution(* main.tsmyk.mybeans.inf.IUserService.delete(..))")
 public void test_around(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -300,17 +236,6 @@ public void test_around(ProceedingJoinPoint joinPoint) throws Throwable {
 	System.out.println("log : delete 方法执行之后");
 }
 
-测试：
-
-@Test
-public void test5(){
-    userServiceImpl.delete("zhangsan");
-}
-
-// 结果：
-// log : delete 方法执行之前, 参数 = zhangsan
-// 根据name删除用户成功, name = zhangsan
-// log : delete 方法执行之后
 
 以上就是 Spring AOP 的几种增强。
 
@@ -419,6 +344,7 @@ public void afterAnyMethod(){
 匹配特定注解
 
 @annotation(org.springframework.transaction.annotation.Transactional) 匹配 任何带有 @Transactional 注解的方法。
+
 8. bean 
 
 匹配特定的 bean 名称的方法
@@ -434,21 +360,6 @@ public void afterAnyMethod(){
     public void test_bean2(){
         System.out.println("+++++++++++++++++++");
     }
-
-测试：
-
-执行该bean下的方法：
-
-@Test
-public void test5(){
-	userServiceImpl.delete("zhangsan");
-}
-//结果：
-// ===================
-// +++++++++++++++++++
-// 根据name删除用户成功, name = zhangsan
-
-以上就是 Spring AOP 所有的指示符的使用方法了。
 
 
 Spring AOP 原理
@@ -588,3 +499,97 @@ log: 目标方法执行之后, 返回值 = User{name='zhangsan', age=20, sex=1, 
 4. CGLIB是针对类实现代理，主要是对指定的类生成一个子类，覆盖其中的方法，但是因为采用的是继承， 所以 final 类或方法无法被代理。
 
 5. Spring AOP 中，如果实现了接口，默认使用的是 JDK 代理，也可以强制使用 CGLIB 代理，如果要代理的类没有实现任何接口，则会使用 CGLIB 进行代理，Spring 会进行自动的切换。
+   
+逻辑运算符
+
+表达式可由多个切点函数通过逻辑运算组成
+
+ &&
+
+与操作，求交集，也可以写成and
+
+例如 execution(* chop(..)) && target(Horseman)  表示Horseman及其子类的chop方法
+
+ ||
+
+或操作，求并集，也可以写成or
+
+例如 execution(* chop(..)) || args(String)  表示名称为chop的方法或者有一个String型参数的方法
+
+!
+
+非操作，求反集，也可以写成not
+
+例如 execution(* chop(..)) and !args(String)  表示名称为chop的方法但是不能是只有一个String型参数的方法
+
+ 
+execution常用于匹配特定的方法，如update时怎么处理，或者匹配某些类，如所有的controller类，是一种范围较大的切面方式，多用于日志或者事务处理等。
+
+其他的几个用法各有千秋，视情况而选择。
+
+
+execution切点函数
+
+ 
+
+execution函数用于匹配方法执行的连接点，语法为：
+
+execution(方法修饰符(可选)  返回类型  方法名  参数  异常模式(可选)) 
+
+参数部分允许使用通配符：
+
+*  匹配任意字符，但只能匹配一个元素
+
+.. 匹配任意字符，可以匹配任意多个元素，表示类时，必须和*联合使用
+
++  必须跟在类名后面，如Horseman+，表示类本身和继承或扩展指定类的所有类
+
+ 
+
+除了execution()，Spring中还支持其他多个函数，这里列出名称和简单介绍，以方便根据需要进行更详细的查询
+
+ @annotation()
+
+表示标注了指定注解的目标类方法
+
+例如 @annotation(org.springframework.transaction.annotation.Transactional) 表示标注了@Transactional的方法
+
+args()
+
+通过目标类方法的参数类型指定切点
+
+例如 args(String) 表示有且仅有一个String型参数的方法
+
+@args()
+
+通过目标类参数的对象类型是否标注了指定注解指定切点
+
+如 @args(org.springframework.stereotype.Service) 表示有且仅有一个标注了@Service的类参数的方法
+
+within()
+
+通过类名指定切点
+
+如 with(examples.chap03.Horseman) 表示Horseman的所有方法
+
+target()
+
+通过类名指定，同时包含所有子类
+
+如 target(examples.chap03.Horseman)  且Elephantman extends Horseman，则两个类的所有方法都匹配
+
+@within()
+
+匹配标注了指定注解的类及其所有子类
+
+如 @within(org.springframework.stereotype.Service) 给Horseman加上@Service标注，则Horseman和Elephantman 的所有方法都匹配
+
+@target()
+
+所有标注了指定注解的类
+
+如 @target(org.springframework.stereotype.Service) 表示所有标注了@Service的类的所有方法
+
+ this()
+
+大部分时候和target()相同，区别是this是在运行时生成代理类后，才判断代理类与指定的对象类型是否匹配
