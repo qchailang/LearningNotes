@@ -129,6 +129,8 @@ NATted的网络配置
 
 .. image:: ../images/redis_1.webp
 
+![redis_1](..\images\redis_1.webp)
+
 在redis 4.0以后加入了以下三个配置项：
 ::
   cluster-announce-ip：要宣布的IP地址。
@@ -178,24 +180,24 @@ docker-entrypoint.sh 文件示例
 ::
   #!/bin/sh
   set -e
-  
+
   # first arg is `-f` or `--some-option`
   # or first arg is `something.conf`
   if [ "${1#-}" != "$1" ] || [ "${1%.conf}" != "$1" ]; then
           set -- redis-server "$@"
   fi
-  
+
   # allow the container to be started with `--user`
   if [ "$1" = 'redis-server' -a "$(id -u)" = '0' ]; then
           find . \! -user redis -exec chown redis '{}' +
           exec gosu redis "$0" "$@"
   fi
-  
+
   # 主要是加了以下三条命令，192.168.1.11为宿主机的IP。
   echo cluster-announce-ip 192.168.1.11 >> /usr/local/redis/redis.conf
   echo cluster-announce-port ${PORT} >> /usr/local/redis/redis.conf
   echo cluster-announce-bus-port 1${PORT} >> /usr/local/redis/redis.conf
-  
+
   exec "$@"
 
 docker-compose.yml 示例:
@@ -339,22 +341,22 @@ docker-entrypoint.sh 文件示例
 ::
   #!/bin/sh
   set -e
-  
+
   # first arg is `-f` or `--some-option`
   # or first arg is `something.conf`
   if [ "${1#-}" != "$1" ] || [ "${1%.conf}" != "$1" ]; then
           set -- redis-server "$@"
   fi
-  
+
   # allow the container to be started with `--user`
   if [ "$1" = 'redis-server' -a "$(id -u)" = '0' ]; then
           find . \! -user redis -exec chown redis '{}' +
           exec gosu redis "$0" "$@"
   fi
-  
+
   # 主要是加了以下一条命令，配置redis服务的端口。
   echo port ${PORT} >> /usr/local/redis/redis.conf
-  
+
   exec "$@"
 
 创建集群命令,宿主机的IP是:192.168.9.130（容器内运行方式）

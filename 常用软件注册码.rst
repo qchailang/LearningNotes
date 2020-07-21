@@ -42,8 +42,7 @@ hosts地址: C:\Windows\System32\drivers\etc
 IntelliJ IDEA 2019
 ******************
 推荐网址：https://zhile.io/
-推荐网址：http://idea.medeming.com/code/
-
+新的 agent license server：https://fls.jetbrains-agent.com
 0.0.0.0 account.jetbrains.com
 0.0.0.0 www.jetbrains.com
 
