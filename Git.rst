@@ -122,7 +122,7 @@ git push origin dev声明远程仓库。
 例子::
 
   # 此为注释 – 将被 Git 忽略
-   
+
   *.a       # 忽略所有 .a 结尾的文件
   !lib.a    # 但 lib.a 除外
   /TODO     # 仅仅忽略项目根目录下的 TODO 文件，不包括 subdir/TODO
@@ -588,3 +588,88 @@ vim .git/config
 [remote "origin"]  
     url = https://jaywcjlove@github.com/jaywcjlove/example.git  
 
+git commit -m “注释” 提交的文件 带m不用进入到vim中
+
+git log 查看历史记录 space(向下翻页) b(向上翻页)p(向下翻页)
+
+git log --pretty=online 显示一行全部
+
+git log --online 显示一行但是哈希值显示一部分
+
+git reflog 比git log --online多显示了指针,步数
+
+git reset --hard 部分哈希值
+
+git reset --hard[索引值] 可以前进可以后退
+
+git reset --hard HEAD^ 只能后退,有几个^就后退几步
+
+git reset --hard HEAD~n 表示后退n步
+
+git help reset查看本地文档
+
+reset 三个参数
+
+ --soft 仅仅在本库中移动指针
+
+ --mixed 在本库中移动指针 重置缓冲区
+
+ --hard 在 本库中移动指针 重置缓冲区 重置工作区
+
+git diff[文件名] 将工作区文件和暂存区进行比较
+
+git diff[本地库中历史版本] [文件名] 将工作去文件和本地库历史版本进行比较
+
+不带文件名可以与多个文件进行比较
+
+分支
+
+ git branch -v 查看分支
+
+ git branch 分支名 创建分支
+
+ git checkout 分支名 切换分支
+
+ git branch -d 分支名 删除分支
+
+ git branch -a 查看所有分支名
+
+git remote -v 查看当前所有远程地址别名
+
+git remote add [别名] [远程地址]
+
+ git remote add origin git下载地址
+
+git push [别名] [远程地址]
+
+git config --system --unset credential.helper 弹出登录窗口
+
+git pull --rebase origin master 从远程仓库来下来并与本地仓库合并
+
+ssh -keygen -t rsa -C “邮箱地址” 生成密钥
+
+ssh -T git@gitee.com 测试码云是否成功
+
+git push -u origin master 推送并提交
+
+5.设置签名
+作用是区分不同人员的开发身份
+
+分为1.项目级别(仓库级别) 2.系统级别
+
+设置的用户签名信息被保存在git/config文件中
+
+6.哈希的特点
+哈希是一个系列的加密算法,各个不同的哈希算法虽然加密程度强度不同,但是有一下几个共同点
+
+1.不管输入数据的数据量有多大,输入同一个哈希算法,得到的加密结果长度固定(一系列的数学运算在里面)
+
+2.哈希算法固定,输入数据固定,输出数据能够保证不变
+
+3.哈希算法确定,输入数据有变化,输出数据一定有变化,而且通常变化很大
+
+4.哈希算法不可逆
+
+Git底层采用的是SHA-1算法.
+
+哈希算法可以被用来验证文件
