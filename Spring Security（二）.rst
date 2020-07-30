@@ -38,8 +38,8 @@ AbstractSecurityInterceptor
 FilterInvocationSecurityMetadataSource 获取所需权限
 AccessDecisionManager 鉴权
 
-相关术语、核心类、接口功能说明
-============
+# 相关术语、核心类、接口功能说明
+
 * secure object 安全对象 指一切可以加上安全配置的对象，最常见的例子是方法调用和web请求，如：一个URL地址。
 * UserDetails 包含了构建Authentication对象需要的必要信息，这些信息来自于应用的DAO或其他数据源。
 * UserDetailsService 根据传入用户名字符串构建一个UserDetails对象。
@@ -332,8 +332,7 @@ Spring Security 5.xx 表单登录流程源码分析
 ----
 #.
 
-增加自定义的认证-手机认证码登录。
---------------
+### 增加自定义的认证-手机认证码登录。
 #. 实现一个自己的AuthenticationProvider。参考AbstractUserDetailsAuthenticationProvider类。
     .. code:: java
 
@@ -343,114 +342,116 @@ Spring Security 5.xx 表单登录流程源码分析
      }
 
 #. 实现一个自己的认证过滤器。参考UsernamePasswordAuthenticationFilter类。
-    .. code:: java
 
-     public class SmsAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
-    
-        public static final String SPRING_SECURITY_FORM_USERNAME_KEY = "mobile";
-        public static final String SPRING_SECURITY_FORM_PASSWORD_KEY = "vcode";
-    
-        private String mobileParameter = SPRING_SECURITY_FORM_USERNAME_KEY;
-        private String vcodeParameter = SPRING_SECURITY_FORM_PASSWORD_KEY;
-    
-        public SmsAuthenticationFilter() {
-            super(new AntPathRequestMatcher("/user/sms", "POST"));
+```java
+ public class SmsAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+
+    public static final String SPRING_SECURITY_FORM_USERNAME_KEY = "mobile";
+    public static final String SPRING_SECURITY_FORM_PASSWORD_KEY = "vcode";
+
+    private String mobileParameter = SPRING_SECURITY_FORM_USERNAME_KEY;
+    private String vcodeParameter = SPRING_SECURITY_FORM_PASSWORD_KEY;
+
+    public SmsAuthenticationFilter() {
+        super(new AntPathRequestMatcher("/user/sms", "POST"));
+    }
+
+    @Override
+    public Authentication attemptAuthentication(HttpServletRequest request,
+                                                HttpServletResponse response) throws AuthenticationException {
+        if (!"POST".equals(request.getMethod())) {
+            throw new AuthenticationServiceException(
+                    "Authentication method not supported: " + request.getMethod());
         }
-    
-        @Override
-        public Authentication attemptAuthentication(HttpServletRequest request,
-                                                    HttpServletResponse response) throws AuthenticationException {
-            if (!"POST".equals(request.getMethod())) {
-                throw new AuthenticationServiceException(
-                        "Authentication method not supported: " + request.getMethod());
-            }
-    
-            String mobile = obtainMobile(request);
-            String vcode = obtainVcode(request);
-    
-            if (mobile == null) {
-                mobile = "";
-            }
-    
-            if (vcode == null) {
-                vcode = "";
-            }
-    
-            mobile = mobile.trim();
-    
-            SmsAuthenticationToken authRequest = new SmsAuthenticationToken(
-                    mobile, vcode);
-    
-            setDetails(request, authRequest);
-    
-            return this.getAuthenticationManager().authenticate(authRequest);
+
+        String mobile = obtainMobile(request);
+        String vcode = obtainVcode(request);
+
+        if (mobile == null) {
+            mobile = "";
         }
-    
-        private String obtainVcode(HttpServletRequest request) {
-            return request.getParameter(vcodeParameter);
+
+        if (vcode == null) {
+            vcode = "";
         }
-    
-        private String obtainMobile(HttpServletRequest request) {
-            return request.getParameter(mobileParameter);
-        }
-    
-        protected void setDetails(HttpServletRequest request,
-                                  SmsAuthenticationToken authRequest) {
-            authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
-        }
-    
-        public String getMobileParameter() {
-            return mobileParameter;
-        }
-    
-        public void setMobileParameter(String mobileParameter) {
-            this.mobileParameter = mobileParameter;
-        }
-    
-        public String getVcodeParameter() {
-            return vcodeParameter;
-        }
-    
-        public void setVcodeParameter(String vcodeParameter) {
-            this.vcodeParameter = vcodeParameter;
-        }
-     }
+
+        mobile = mobile.trim();
+
+        SmsAuthenticationToken authRequest = new SmsAuthenticationToken(
+                mobile, vcode);
+
+        setDetails(request, authRequest);
+
+        return this.getAuthenticationManager().authenticate(authRequest);
+    }
+
+    private String obtainVcode(HttpServletRequest request) {
+        return request.getParameter(vcodeParameter);
+    }
+
+    private String obtainMobile(HttpServletRequest request) {
+        return request.getParameter(mobileParameter);
+    }
+
+    protected void setDetails(HttpServletRequest request,
+                              SmsAuthenticationToken authRequest) {
+        authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
+    }
+
+    public String getMobileParameter() {
+        return mobileParameter;
+    }
+
+    public void setMobileParameter(String mobileParameter) {
+        this.mobileParameter = mobileParameter;
+    }
+
+    public String getVcodeParameter() {
+        return vcodeParameter;
+    }
+
+    public void setVcodeParameter(String vcodeParameter) {
+        this.vcodeParameter = vcodeParameter;
+    }
+ }
+```
 #. 在Security配置类中加入以下内容：
-    .. code:: java
 
-        @Autowired
-        private UserDetailsService myUserDetailsService;
-    
-        @Bean
-        public SmsAuthenticationFilter smsAuthenticationFilter() {
-            SmsAuthenticationFilter filter = new SmsAuthenticationFilter();
-            filter.setAuthenticationManager(this.authenticationManagerBean());
-            filter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
-            return filter;
-        }
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-            return new BCryptPasswordEncoder();
-        }
-        @Bean
-        public AuthenticationProvider smsAuthenticationProvider() {
-            return new SmsAuthenticationProvider();
-        }
-    
-        // Security缺省提供的用户名密码的认证的Provider。
-        @Bean
-        public AuthenticationProvider daoAuthenticationProvider() {
-            DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-            provider.setUserDetailsService(myUserDetailsService);
-            provider.setPasswordEncoder(passwordEncoder());
-            return provider;
-        }
-    
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
-            http
-                .authenticationProvider(smsAuthenticationProvider())
-                .authenticationProvider(daoAuthenticationProvider())
-                .addFilterAfter(smsAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-                // ...略
-        }
+```java
+    @Autowired
+    private UserDetailsService myUserDetailsService;
+
+    @Bean
+    public SmsAuthenticationFilter smsAuthenticationFilter() {
+        SmsAuthenticationFilter filter = new SmsAuthenticationFilter();
+        filter.setAuthenticationManager(this.authenticationManagerBean());
+        filter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
+        return filter;
+    }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+    @Bean
+    public AuthenticationProvider smsAuthenticationProvider() {
+        return new SmsAuthenticationProvider();
+    }
+
+    // Security缺省提供的用户名密码的认证的Provider。
+    @Bean
+    public AuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(myUserDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+            .authenticationProvider(smsAuthenticationProvider())
+            .authenticationProvider(daoAuthenticationProvider())
+            .addFilterAfter(smsAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+            // ...略
+    }
+```
